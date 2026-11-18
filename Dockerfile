@@ -2,7 +2,7 @@ FROM node:24-bookworm-slim AS build
 WORKDIR /app
 RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \
-  && corepack enable \
+  && npm install -g pnpm@10.18.3 \
   && rm -rf /var/lib/apt/lists/*
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages ./packages
@@ -15,7 +15,7 @@ ENV NODE_ENV=production PORT=3000 HOST=0.0.0.0 DATA_DIR=/data
 WORKDIR /app
 RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \
-  && corepack enable \
+  && npm install -g pnpm@10.18.3 \
   && mkdir -p /data \
   && chown node:node /data \
   && rm -rf /var/lib/apt/lists/*
