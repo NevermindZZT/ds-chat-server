@@ -110,7 +110,13 @@ window.__ModuleLoader__.load({
 .dcs-btn:disabled{opacity:.5;cursor:default}
 .dcs-btn-primary{background:#3964fe;border-color:#3964fe;color:#fff}
 .dcs-btn-primary:hover:not(:disabled){background:#2f57e6}
-.dcs-select{font:inherit;font-size:13px;color:inherit;background:rgba(128,128,128,.14);border:1px solid rgba(128,128,128,.5);border-radius:8px;padding:6px 8px;min-width:0;max-width:220px}
+.dcs-select{display:flex;align-items:center;justify-content:space-between;gap:8px;font:inherit;font-size:13px;color:inherit;background:rgba(128,128,128,.14);border:1px solid rgba(128,128,128,.5);border-radius:8px;padding:6px 8px;min-width:0;max-width:220px;text-align:left;cursor:pointer}
+.dcs-select:disabled{opacity:.5;cursor:default}
+.dcs-dropdown{position:relative;z-index:5}
+.dcs-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:100;min-width:100%;max-width:320px;max-height:280px;overflow:auto;padding:4px;border:1px solid rgba(128,128,128,.45);border-radius:10px;background:var(--dsw-alias-bg-overlay,#1f2329);color:var(--dsw-alias-label-primary,#ededed);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.dcs-menu button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;box-sizing:border-box;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;font-size:13px;text-align:left;cursor:pointer;white-space:nowrap}
+.dcs-menu button:hover,.dcs-menu button:focus-visible{background:rgba(128,128,128,.22);outline:none}
+.dcs-check{color:#5b8cff}
 .dcs-notice{font-size:12px;line-height:18px;color:inherit;opacity:.78;margin:0}
 .dcs-error{font-size:12px;line-height:18px;color:#ff6b6b;margin:0}
 .dcs-frame-wrap{position:relative;flex:1;min-height:0;background:var(--dsw-alias-bg-base,#111)}
@@ -426,6 +432,74 @@ window.__ModuleLoader__.load({
       )
     }
 
+    function WorkspaceSelect({ value, options, placeholder, disabled, ariaLabel, onChange }) {
+      const [open, setOpen] = React.useState(false)
+      const rootRef = React.useRef(null)
+      React.useEffect(() => {
+        if (!open) {
+          return undefined
+        }
+        const dismiss = (event) => {
+          if (rootRef.current && !rootRef.current.contains(event.target)) {
+            setOpen(false)
+          }
+        }
+        const onKey = (event) => {
+          if (event.key === 'Escape') {
+            setOpen(false)
+          }
+        }
+        document.addEventListener('mousedown', dismiss)
+        document.addEventListener('keydown', onKey)
+        return () => {
+          document.removeEventListener('mousedown', dismiss)
+          document.removeEventListener('keydown', onKey)
+        }
+      }, [open])
+      const current = options.find((option) => option.value === value)
+      return h(
+        'div',
+        { className: 'dcs-dropdown', ref: rootRef },
+        h(
+          'button',
+          {
+            type: 'button',
+            className: 'dcs-select',
+            'aria-label': ariaLabel,
+            'aria-haspopup': 'listbox',
+            'aria-expanded': open,
+            disabled,
+            onClick: () => setOpen((value) => !value),
+          },
+          h('span', null, current ? current.label : placeholder),
+          h('span', { 'aria-hidden': 'true' }, '▾')
+        ),
+        open
+          ? h(
+              'div',
+              { className: 'dcs-menu', role: 'listbox', 'aria-label': ariaLabel },
+              options.map((option) =>
+                h(
+                  'button',
+                  {
+                    key: option.value,
+                    type: 'button',
+                    role: 'option',
+                    'aria-selected': option.value === value,
+                    onClick: () => {
+                      setOpen(false)
+                      onChange(option.value)
+                    },
+                  },
+                  h('span', null, option.label),
+                  option.value === value ? h('span', { className: 'dcs-check' }, '✓') : null
+                )
+              )
+            )
+          : null
+      )
+    }
+
     function ChatPanel(props) {
       const t = (key, vars) => props.t(key, vars)
       const [baseUrl, setBaseUrl] = React.useState('')
@@ -528,20 +602,17 @@ window.__ModuleLoader__.load({
                 React.Fragment,
                 null,
                 workspaces.length
-                  ? h(
-                      'select',
-                      {
-                        className: 'dcs-select',
-                        value: workspaceId,
-                        disabled: importing,
-                        'aria-label': t('workspace'),
-                        onChange: (event) => setWorkspaceId(event.target.value),
-                      },
-                      h('option', { value: '' }, t('chooseWorkspace')),
-                      ...workspaces.map((item) =>
-                        h('option', { key: item.id, value: item.id }, item.title)
-                      )
-                    )
+                  ? h(WorkspaceSelect, {
+                      value: workspaceId,
+                      options: [
+                        { value: '', label: t('chooseWorkspace') },
+                        ...workspaces.map((item) => ({ value: item.id, label: item.title })),
+                      ],
+                      placeholder: t('chooseWorkspace'),
+                      disabled: importing,
+                      ariaLabel: t('workspace'),
+                      onChange: setWorkspaceId,
+                    })
                   : h('span', { className: 'dcs-notice' }, t('noWorkspaces')),
                 h(
                   'button',
