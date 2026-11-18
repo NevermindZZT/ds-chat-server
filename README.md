@@ -78,6 +78,20 @@ Or install it through DSH **Plugins → Add plugin** using the package name `@ne
 - Never expose stdio MCP command execution to untrusted users. Add only reviewed executables to `MCP_STDIO_ALLOWLIST`.
 - History ZIP imports are validated before replacing the server-side history. Keep a stopped-volume backup before upgrades.
 
+## Release
+
+Pushing a `v*` tag runs [`.github/workflows/release.yml`](.github/workflows/release.yml):
+
+- builds a multi-arch `linux/amd64,linux/arm64` image and pushes `nevermindzzt/ds-chat-server:<version>` plus `latest`;
+- sets the plugin version from the tag and publishes `@nevermindzzt/dsh-chat-server` to npm.
+
+Configure these repository secrets first: `DOCKERHUB_USERNAME` (`NevermindZZT`), `DOCKERHUB_TOKEN` (Docker Hub access token), and `NPM_TOKEN` (npm automation token for the `@nevermindzzt` scope). The Docker Hub repository and npm scope must exist for the first release.
+
+```sh
+git tag v0.2.0
+git push origin v0.2.0
+```
+
 ## License
 
 The upstream Chat Demo and this project are MIT-licensed; retain [LICENSE](LICENSE). Third-party dependencies remain subject to their respective licenses.

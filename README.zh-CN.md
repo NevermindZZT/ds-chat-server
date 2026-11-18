@@ -78,6 +78,20 @@ dsh plugin --profile web add @nevermindzzt/dsh-chat-server
 - 不要让不可信用户随意执行 stdio MCP 命令；仅将审核过的程序加入 `MCP_STDIO_ALLOWLIST`。
 - 导入历史 ZIP 会先校验再替换服务端历史。升级前先停止服务并备份数据卷。
 
+## 发布
+
+推送 `v*` 标签会触发 [`.github/workflows/release.yml`](.github/workflows/release.yml)：
+
+- 构建 `linux/amd64,linux/arm64` 多架构镜像，推送 `nevermindzzt/ds-chat-server:<版本>` 和 `latest`；
+- 使用标签版本发布 npm 包 `@nevermindzzt/dsh-chat-server`。
+
+首次发布前需配置仓库 Secrets：`DOCKERHUB_USERNAME`（`NevermindZZT`）、`DOCKERHUB_TOKEN`（Docker Hub Access Token）、`NPM_TOKEN`（可发布 `@nevermindzzt` scope 的 npm Automation Token），并确保 Docker Hub 仓库和 npm scope 已创建。
+
+```sh
+git tag v0.2.0
+git push origin v0.2.0
+```
+
 ## 许可证
 
 上游 Chat Demo 与本项目使用 MIT 许可证；请保留 [LICENSE](LICENSE)。第三方依赖遵循各自许可证。
