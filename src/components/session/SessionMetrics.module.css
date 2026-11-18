@@ -1,0 +1,64 @@
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  gap: 6px 16px;
+  box-sizing: border-box;
+  min-height: 30px;
+  padding: 6px 12px 2px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.metrics span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.metrics b {
+  color: var(--dsw-alias-label-secondary);
+  font-weight: 500;
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.context {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ring {
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: var(--dsw-alias-border-l1);
+  stroke-width: 2;
+}
+
+.ringFill {
+  fill: none;
+  stroke: var(--dsw-alias-brand-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 180ms ease;
+}
+
+@media not all and (min-width: 768px) {
+  .metrics {
+    gap: 4px 10px;
+    padding: 5px 8px 1px;
+    font-size: 10px;
+  }
+}

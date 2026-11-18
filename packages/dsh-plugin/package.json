@@ -1,0 +1,78 @@
+{
+  "name": "@nevermindzzt/dsh-chat-server",
+  "version": "0.2.0",
+  "private": false,
+  "type": "module",
+  "description": "Open DeepSeek Chat inside DSH and import conversations into DSH Sessions.",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "LICENSE",
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "docs",
+    "README.md",
+    "icon.svg"
+  ],
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.1.0",
+    "@deepseek-ai/dsh-brand": "0.2.2-rc.3",
+    "@deepseek-ai/dsh-credentials": "0.2.2-rc.3",
+    "@deepseek-ai/dsh-llm": "0.2.2-rc.3",
+    "@deepseek-ai/dsh-session": "0.2.2-rc.3",
+    "@deepseek-ai/dsh-session-title": "0.2.2-rc.3",
+    "@deepseek-ai/dsh-tool-web": "0.2.2-rc.3",
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.3"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "~3.19.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-api-remote-access",
+        "@deepseek-ai/dsh-api-session-controller",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-workspace"
+      ]
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NevermindZZT/ds-chat-server.git",
+    "directory": "packages/dsh-plugin"
+  },
+  "homepage": "https://github.com/NevermindZZT/ds-chat-server/tree/main/packages/dsh-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/NevermindZZT/ds-chat-server/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek",
+    "chat",
+    "mcp",
+    "skills"
+  ]
+}

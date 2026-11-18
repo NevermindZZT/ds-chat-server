@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Chat",
+    "description": "Open the DeepSeek Chat website directly from DSH's left navigation. Plugin settings hold the server address and one-time pairing code, and the current conversation can be imported into a DSH Workspace.",
+    "detail": "docs/DETAIL.md"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Chat",
+    "description": "在 DSH 左侧导航中直接打开 DeepSeek Chat 网站聊天页面；插件设置可配置服务端地址和一次性配对码，并将当前会话导入 DSH Workspace。",
+    "detail": "docs/DETAIL.zh.md"
+  }
+}

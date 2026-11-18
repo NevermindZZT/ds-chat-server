@@ -1,0 +1,55 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  color: var(--dsw-alias-label-primary);
+}
+
+.toggleCell {
+  display: flex;
+  align-items: center;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.toggle input {
+  accent-color: var(--dsw-alias-brand-primary);
+}
+
+.rangeCell {
+  display: grid;
+  gap: 10px;
+}
+
+.rangeLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.rangeLabel b {
+  color: var(--dsw-alias-label-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.rangeCell input[type='range'] {
+  display: block;
+  width: 100%;
+  margin: 0;
+  accent-color: var(--dsw-alias-brand-primary);
+}
+
+.status {
+  min-height: 38px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}

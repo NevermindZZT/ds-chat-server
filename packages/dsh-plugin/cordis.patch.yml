@@ -1,0 +1,5 @@
+- insert:
+    - id: chat-server
+      name: '@nevermindzzt/dsh-chat-server'
+      config:
+        baseUrl: 'http://127.0.0.1:3000'
