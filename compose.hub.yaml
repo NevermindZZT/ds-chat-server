@@ -1,6 +1,6 @@
 services:
   chat-server:
-    image: nevermindzzt/ds-chat-server:${CHAT_SERVER_IMAGE_TAG:-0.2.2}
+    image: nevermindzzt/ds-chat-server:${CHAT_SERVER_IMAGE_TAG:-0.2.3}
     pull_policy: always
     restart: unless-stopped
     env_file:
