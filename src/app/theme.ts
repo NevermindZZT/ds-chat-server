@@ -40,6 +40,7 @@ const applyTheme = (theme: Theme) => {
   } else {
     body.removeAttribute('data-ds-dark-theme')
   }
+  document.documentElement.dataset.theme = theme
   document.documentElement.style.colorScheme = theme
   // 首次背景色同步在样式表加载完成后执行，适配 WebKit 的 defer 脚本执行顺序。
   if (document.readyState === 'complete') {

@@ -5,7 +5,8 @@ import { pool, verifyPassword, changeCredentials } from './db.js'
 
 const DATA_DIR = path.resolve(process.env.DATA_DIR ?? '.data')
 const COOKIE = 'chat_server_session'
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 14
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30
+export const SESSION_RENEW_WINDOW_SECONDS = 60 * 60 * 24 * 7
 const pairCodes = new Map()
 let appSecretPromise
 
@@ -119,7 +120,13 @@ async function userFromCookie(request) {
     )
     const row = rows[0]
     return row
-      ? { id: row.id, username: row.username, mustChangePassword: row.must_change_password }
+      ? {
+          id: row.id,
+          username: row.username,
+          mustChangePassword: Boolean(row.must_change_password),
+          cookieAuth: true,
+          sessionExpiresAt: session.exp,
+        }
       : null
   } catch {
     return null

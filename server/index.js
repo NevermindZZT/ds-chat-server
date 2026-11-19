@@ -46,6 +46,7 @@ import {
   updatePassword,
   updateCredentials,
   issueBrowserToken,
+  SESSION_RENEW_WINDOW_SECONDS,
   getDeepSeekApiKey,
   issuePairCode,
   login,
@@ -96,6 +97,12 @@ app.addHook('preHandler', async (request, reply) => {
     return reply.code(401).send({ error: { message: 'Please sign in to the Chat Server.' } })
   }
   request.chatUser = user
+  if (
+    user.cookieAuth &&
+    user.sessionExpiresAt - Date.now() / 1000 < SESSION_RENEW_WINDOW_SECONDS
+  ) {
+    reply.header('set-cookie', await createSessionCookie(user))
+  }
   if (
     user.mustChangePassword &&
     ![

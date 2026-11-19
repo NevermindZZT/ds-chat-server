@@ -3,6 +3,10 @@ import { useRef, useState, type ReactNode } from 'react'
 import {
   IconDarkOutline16,
   IconDataOutline16,
+  IconMcpOutline16,
+  IconPlugOutline16,
+  IconSkillOutline16,
+  IconUserOutline16,
   IconDownloadOutline16,
   IconFollowsystemOutline16,
   IconLightOutline16,
@@ -54,11 +58,11 @@ const sections: { value: SettingsSection; label: TranslationKey; icon: ReactNode
     label: 'settingDialogAsideGeneralOptionLabel',
     icon: <IconSettingsOutline16 />,
   },
-  { value: 'account', label: 'account', icon: <IconSettingsOutline16 /> },
+  { value: 'account', label: 'account', icon: <IconUserOutline16 /> },
   { value: 'data', label: 'settingDialogAsideDataOptionLabel', icon: <IconDataOutline16 /> },
-  { value: 'mcp', label: 'mcpServers', icon: <IconSettingsOutline16 /> },
-  { value: 'skills', label: 'skills', icon: <IconDataOutline16 /> },
-  { value: 'dsh', label: 'dshPairing', icon: <IconSettingsOutline16 /> },
+  { value: 'mcp', label: 'mcpServers', icon: <IconMcpOutline16 /> },
+  { value: 'skills', label: 'skills', icon: <IconSkillOutline16 /> },
+  { value: 'dsh', label: 'dshPairing', icon: <IconPlugOutline16 /> },
 ]
 
 const SettingsContent = () => {

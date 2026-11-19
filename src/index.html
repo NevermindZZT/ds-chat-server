@@ -3,6 +3,35 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f8f9fb" />
+    <script>
+      ;(() => {
+        let dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        try {
+          const saved = localStorage.getItem('chat-demo:theme-preference')
+          if (saved === 'dark') dark = true
+          if (saved === 'light') dark = false
+        } catch {
+          /* localStorage may be unavailable; fall back to the system preference. */
+        }
+        const root = document.documentElement
+        root.dataset.theme = dark ? 'dark' : 'light'
+        root.style.colorScheme = dark ? 'dark' : 'light'
+        root.style.backgroundColor = dark ? '#151517' : '#f8f9fb'
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', dark ? '#151517' : '#f8f9fb')
+      })()
+    </script>
+    <style>
+      html {
+        background: #f8f9fb;
+      }
+      html[data-theme='dark'] {
+        background: #151517;
+        color-scheme: dark;
+      }
+    </style>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>DeepSeek Chat</title>
   </head>

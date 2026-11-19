@@ -523,3 +523,51 @@ export const IconToastError16 = () => (
     />
   </svg>
 )
+
+export const IconUserOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="5" r="2.7" stroke="currentColor" strokeWidth="1.4" />
+    <path
+      d="M2.8 14c.2-2.8 2.4-4.8 5.2-4.8s5 2 5.2 4.8"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+export const IconMcpOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="3" cy="8" r="1.7" fill="currentColor" />
+    <circle cx="12.5" cy="3.8" r="1.7" fill="currentColor" />
+    <circle cx="12.5" cy="12.2" r="1.7" fill="currentColor" />
+    <path
+      d="M4.5 7.2 11 4.3M4.5 8.8l6.5 2.9"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+export const IconSkillOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8 1.6 9.6 6l4.4 1.6L9.6 9.2 8 13.6 6.4 9.2 2 7.6 6.4 6 8 1.6Z"
+      fill="currentColor"
+    />
+    <circle cx="13" cy="12.8" r="1.3" fill="currentColor" opacity="0.7" />
+  </svg>
+)
+
+export const IconPlugOutline16 = () => (
+  <svg width={16} height={16} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M5.7 2v2.6M10.3 2v2.6M4.2 4.6h7.6v2a3.8 3.8 0 0 1-7.6 0v-2ZM8 10.4V14"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+)

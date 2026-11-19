@@ -432,6 +432,40 @@ window.__ModuleLoader__.load({
       )
     }
 
+    const persistentFrame = {
+      host: null,
+      frame: null,
+      baseUrl: '',
+      src: '',
+      expiresAt: 0,
+    }
+
+    const panelCache = {
+      baseUrl: '',
+      status: null,
+      workspaces: [],
+      workspaceId: '',
+    }
+
+    function ensurePersistentFrame() {
+      if (persistentFrame.frame) {
+        return persistentFrame
+      }
+      const host = document.createElement('div')
+      host.setAttribute('data-dsh-chat-frame', '')
+      host.style.cssText =
+        'position:fixed;z-index:5;overflow:hidden;display:none;background:var(--dsw-alias-bg-base,#fff);border-radius:0'
+      const frame = document.createElement('iframe')
+      frame.title = 'Chat'
+      frame.allow = 'clipboard-read; clipboard-write; microphone'
+      frame.style.cssText = 'display:block;width:100%;height:100%;border:0;background:transparent'
+      host.appendChild(frame)
+      document.body.appendChild(host)
+      persistentFrame.host = host
+      persistentFrame.frame = frame
+      return persistentFrame
+    }
+
     function WorkspaceSelect({ value, options, placeholder, disabled, ariaLabel, onChange }) {
       const [open, setOpen] = React.useState(false)
       const rootRef = React.useRef(null)
@@ -502,17 +536,23 @@ window.__ModuleLoader__.load({
 
     function ChatPanel(props) {
       const t = (key, vars) => props.t(key, vars)
-      const [baseUrl, setBaseUrl] = React.useState('')
-      const [status, setStatus] = React.useState(null)
+      const [baseUrl, setBaseUrl] = React.useState(() => panelCache.baseUrl)
+      const [status, setStatus] = React.useState(() => panelCache.status)
       const [sessionId, setSessionId] = React.useState('')
-      const [workspaces, setWorkspaces] = React.useState([])
-      const [workspaceId, setWorkspaceId] = React.useState('')
+      const [workspaces, setWorkspaces] = React.useState(() => panelCache.workspaces)
+      const [workspaceId, setWorkspaceId] = React.useState(() => panelCache.workspaceId)
       const [importing, setImporting] = React.useState(false)
       const [error, setError] = React.useState('')
       const [notice, setNotice] = React.useState('')
       const [frameKey, setFrameKey] = React.useState(0)
-      const [frameSrc, setFrameSrc] = React.useState('')
+      const [settingsLoaded, setSettingsLoaded] = React.useState(() => Boolean(panelCache.baseUrl))
+      const [frameSrc, setFrameSrc] = React.useState(() =>
+        persistentFrame.baseUrl && persistentFrame.baseUrl === panelCache.baseUrl
+          ? persistentFrame.src
+          : ''
+      )
       const frameRef = React.useRef(null)
+      const slotRef = React.useRef(null)
       const mounted = React.useRef(true)
 
       React.useEffect(() => {
@@ -532,14 +572,22 @@ window.__ModuleLoader__.load({
           if (!mounted.current) {
             return
           }
-          setBaseUrl(String(settings?.baseUrl || ''))
+          const nextBaseUrl = String(settings?.baseUrl || '')
+          const nextList = Array.isArray(nextWorkspaces) ? nextWorkspaces : []
+          setBaseUrl(nextBaseUrl)
           setStatus(connection)
-          setWorkspaces(Array.isArray(nextWorkspaces) ? nextWorkspaces : [])
-          setWorkspaceId((current) =>
-            nextWorkspaces.some((item) => item.id === current)
+          setWorkspaces(nextList)
+          setWorkspaceId((current) => {
+            const selected = nextList.some((item) => item.id === current)
               ? current
-              : nextWorkspaces[0]?.id || ''
-          )
+              : nextList[0]?.id || ''
+            panelCache.workspaceId = selected
+            return selected
+          })
+          panelCache.baseUrl = nextBaseUrl
+          panelCache.status = connection
+          panelCache.workspaces = nextList
+          setSettingsLoaded(true)
           setError('')
         } catch (reason) {
           if (mounted.current) {
@@ -554,25 +602,46 @@ window.__ModuleLoader__.load({
 
       React.useEffect(() => {
         let cancelled = false
-        setFrameSrc('')
         if (!baseUrl) {
+          setFrameSrc('')
           return undefined
         }
         if (!status?.connected) {
+          persistentFrame.baseUrl = baseUrl
+          persistentFrame.src = baseUrl
+          persistentFrame.expiresAt = 0
           setFrameSrc(baseUrl)
+          return undefined
+        }
+        if (
+          persistentFrame.baseUrl === baseUrl &&
+          persistentFrame.src &&
+          persistentFrame.expiresAt > Date.now() + 60_000
+        ) {
+          setFrameSrc(persistentFrame.src)
           return undefined
         }
         void (async () => {
           try {
             const result = await hostRequest('browser-token', {})
-            if (cancelled || typeof result?.token !== 'string') {
+            if (cancelled) {
+              return
+            }
+            if (typeof result?.token !== 'string') {
+              setFrameSrc(baseUrl)
               return
             }
             const url = new URL(baseUrl)
             url.hash = new URLSearchParams({ dshToken: result.token }).toString()
+            persistentFrame.baseUrl = baseUrl
+            persistentFrame.src = url.toString()
+            persistentFrame.expiresAt = Date.parse(String(result?.expiresAt || '')) || 0
             setFrameSrc(url.toString())
           } catch {
             if (!cancelled) {
+              persistentFrame.baseUrl = baseUrl
+              persistentFrame.src = baseUrl
+              persistentFrame.expiresAt = 0
               setFrameSrc(baseUrl)
             }
           }
@@ -581,6 +650,38 @@ window.__ModuleLoader__.load({
           cancelled = true
         }
       }, [baseUrl, status?.connected, frameKey])
+
+      React.useEffect(() => {
+        const slot = slotRef.current
+        if (!slot || !frameSrc) {
+          return undefined
+        }
+        const overlay = ensurePersistentFrame()
+        if (overlay.frame.getAttribute('src') !== frameSrc) {
+          overlay.frame.src = frameSrc
+        }
+        frameRef.current = overlay.frame
+        let frameRequest = 0
+        const place = () => {
+          const rect = slot.getBoundingClientRect()
+          if (rect.width < 2 || rect.height < 2) {
+            overlay.host.style.display = 'none'
+          } else {
+            overlay.host.style.display = 'block'
+            overlay.host.style.left = `${rect.left}px`
+            overlay.host.style.top = `${rect.top}px`
+            overlay.host.style.width = `${rect.width}px`
+            overlay.host.style.height = `${rect.height}px`
+          }
+          frameRequest = requestAnimationFrame(place)
+        }
+        place()
+        return () => {
+          cancelAnimationFrame(frameRequest)
+          overlay.host.style.display = 'none'
+          frameRef.current = null
+        }
+      }, [frameSrc])
 
       React.useEffect(() => {
         const onMessage = (event) => {
@@ -622,11 +723,13 @@ window.__ModuleLoader__.load({
           'div',
           { className: 'dcs-bar' },
           h('h2', { className: 'dcs-title' }, t('title')),
-          h(
-            'span',
-            { className: `dcs-badge${status?.connected ? ' dcs-badge-on' : ''}` },
-            status?.connected ? t('connected') : t('disconnected')
-          ),
+          status
+            ? h(
+                'span',
+                { className: `dcs-badge${status.connected ? ' dcs-badge-on' : ''}` },
+                status.connected ? t('connected') : t('disconnected')
+              )
+            : null,
           h('span', { className: 'dcs-spacer' }),
           status?.connected
             ? h(
@@ -642,7 +745,10 @@ window.__ModuleLoader__.load({
                       placeholder: t('chooseWorkspace'),
                       disabled: importing,
                       ariaLabel: t('workspace'),
-                      onChange: setWorkspaceId,
+                      onChange: (nextId) => {
+                        panelCache.workspaceId = nextId
+                        setWorkspaceId(nextId)
+                      },
                     })
                   : h('span', { className: 'dcs-notice' }, t('noWorkspaces')),
                 h(
@@ -669,6 +775,7 @@ window.__ModuleLoader__.load({
                     className: 'dcs-btn',
                     onClick: () => {
                       setSessionId('')
+                      persistentFrame.expiresAt = 0
                       setFrameKey((value) => value + 1)
                     },
                   },
@@ -715,27 +822,14 @@ window.__ModuleLoader__.load({
           : null,
         h(
           'div',
-          { className: 'dcs-frame-wrap' },
-          baseUrl
-            ? frameSrc
-              ? h('iframe', {
-                  key: frameKey,
-                  ref: frameRef,
-                  className: 'dcs-frame',
-                  src: frameSrc,
-                  title: t('title'),
-                  allow: 'clipboard-read; clipboard-write; microphone',
-                })
-              : h(
-                  'div',
-                  { className: 'dcs-empty' },
-                  h('p', { className: 'dcs-notice' }, t('working'))
-                )
-            : h(
+          { className: 'dcs-frame-wrap', ref: slotRef },
+          !baseUrl && settingsLoaded
+            ? h(
                 'div',
                 { className: 'dcs-empty' },
                 h('p', { className: 'dcs-notice' }, t('frameUnavailable'))
               )
+            : null
         )
       )
     }
