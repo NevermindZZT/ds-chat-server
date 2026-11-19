@@ -112,7 +112,7 @@ window.__ModuleLoader__.load({
 .dcs-btn-primary:hover:not(:disabled){background:#2f57e6}
 .dcs-select{display:flex;align-items:center;justify-content:space-between;gap:8px;font:inherit;font-size:13px;color:inherit;background:rgba(128,128,128,.14);border:1px solid rgba(128,128,128,.5);border-radius:8px;padding:6px 8px;min-width:0;max-width:220px;text-align:left;cursor:pointer}
 .dcs-select:disabled{opacity:.5;cursor:default}
-.dcs-dropdown{position:relative;z-index:5}
+.dcs-dropdown{position:relative;z-index:1000}
 .dcs-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:100;min-width:100%;max-width:320px;max-height:280px;overflow:auto;padding:4px;border:1px solid rgba(128,128,128,.45);border-radius:10px;background:var(--dsw-alias-bg-overlay,#1f2329);color:var(--dsw-alias-label-primary,#ededed);box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .dcs-menu button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;box-sizing:border-box;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;font-size:13px;text-align:left;cursor:pointer;white-space:nowrap}
 .dcs-menu button:hover,.dcs-menu button:focus-visible{background:rgba(128,128,128,.22);outline:none}
