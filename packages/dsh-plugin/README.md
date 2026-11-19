@@ -29,6 +29,19 @@ If an older `@local/dsh-chat-server` bundle is still installed, disable it in **
 dsh plugin --profile web remove @local/dsh-chat-server
 ```
 
+## Recover from invalid credential keys
+
+Plugin versions through 0.2.2 could write credential record keys with the invalid scope `local.dsh-chat-server`. DSH may then fail to start its credentials service, even if the plugin is disabled. Updating the plugin alone cannot repair a credential file that DSH cannot load.
+
+1. Stop every DSH process sharing the affected `DSH_HOME`. Back up the complete credentials YAML file to a private local location outside cloud sync and version control. Do not paste its contents into chat or logs. The default on Windows is `%USERPROFILE%\.dsh\.credentials.yaml`; `DSH_HOME` or the credentials provider configuration can override it.
+2. In a trusted editor, find only the keys directly under `records:`. If the destination keys do not already exist, rename `local.dsh-chat-server/access-token` to `dsh-chat-server/access-token` and `local.dsh-chat-server/base-url` to `dsh-chat-server/base-url`. Leave each value and all other records unchanged. Either old key may be absent.
+3. If an old key and its destination both exist, do not overwrite or merge them: determine which record to keep first. Alternatively, back up the file and remove only the two old Chat records, then configure the server address and pair again. Never clear the entire credentials file.
+4. Do not reactivate the old plugin version, which can recreate invalid keys. Install the corrected plugin version after it is released, restart DSH, and verify other plugins and Chat. Keep the backup until verification succeeds.
+
+### Windows 启动恢复
+
+旧插件可能写入 `local.dsh-chat-server/access-token` 和 `local.dsh-chat-server/base-url` 两个不符合 DSH 格式的凭据键，导致凭据服务无法启动。请先退出所有使用同一 `DSH_HOME` 的 DSH 进程，备份默认位置 `%USERPROFILE%\.dsh\.credentials.yaml`（如自定义过路径则以实际配置为准），在可信编辑器中只将 `records:` 下这两个旧键分别改为 `dsh-chat-server/access-token` 和 `dsh-chat-server/base-url`，不要改变值或其他条目。若新旧键同时存在，不要覆盖或合并；也可备份后仅删除这两条旧记录，待安装修复版插件后重新配置地址和配对。不要将凭据文件或内容发给任何人，也不要重新启用旧插件。修复版发布前不要安装未经验证的版本豁免。
+
 ## Use
 
 1. **插件 → Chat** 设置服务端地址（例如 `http://127.0.0.1:3000`），保存。

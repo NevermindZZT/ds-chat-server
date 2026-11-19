@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import Schema from '@deepseek-ai/schemastery'
 import { brandString } from '@deepseek-ai/dsh-brand'
+import { credentialKey } from '@deepseek-ai/dsh-credentials'
 import {
   attributionHeaders,
   LlmAdapter,
@@ -27,8 +28,8 @@ import {
 const PROVIDER_ID = 'chat-server'
 const SKILL_PROVIDER_ID = 'chat-server'
 const HOST_ROUTE = '/api/dsh-chat-server/plugin'
-const TOKEN_RECORD_KEY = brandString('local.dsh-chat-server/access-token')
-const BASE_URL_RECORD_KEY = brandString('local.dsh-chat-server/base-url')
+const TOKEN_RECORD_KEY = credentialKey('dsh-chat-server', 'access-token')
+const BASE_URL_RECORD_KEY = credentialKey('dsh-chat-server', 'base-url')
 const MAX_PLUGIN_REQUEST_BYTES = 2 * 1024 * 1024
 const MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024
 const MAX_SESSION_MESSAGES = 10_000
