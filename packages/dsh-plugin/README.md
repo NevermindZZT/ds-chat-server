@@ -1,6 +1,8 @@
 # DSH Chat plugin
 
-`@nevermindzzt/dsh-chat-server` opens the DeepSeek Chat website inside DSH and adds an **import current conversation** action. The chat UI is the website itself, so both share one design and one feature set.
+`@nevermindzzt/dsh-chat-server` opens your self-hosted DeepSeek Chat inside DSH. Use **Chat** in the left navigation for the full page, or enable its entry in the right-sidebar guide from the plugin settings. The full panel can import the current conversation into a DSH Workspace; the plugin also bridges Chat Server models, Skills and MCP tools.
+
+在 DSH 左侧的 **Chat** 中打开聊天页面，也可以在插件设置中启用右侧边栏入口。先配置服务端地址，再从网站 **设置 → DSH 插件配对** 生成一次性配对码并连接。聊天面板支持将当前会话导入指定的 DSH Workspace，同时提供模型、Skills 和 MCP 工具桥接。
 
 ## Install
 
@@ -41,10 +43,11 @@ The panel reports the active session to the host from the embedded page, so impo
 The bundle settings page in **插件 → Chat** follows DSH's settings rows and provides:
 
 - Server address, saved through the Host plugin route.
+- A switch for the Chat entry in the right-sidebar guide.
 - Connection status and credential expiry.
 - One-time pairing code, connect and disconnect.
 
-No token or code is written to the plugin config, browser storage, or the iframe URL.
+The pairing token is held by DSH's credential service. For embedded sessions, a short-lived browser token is passed in the iframe URL fragment and stored in sessionStorage; protect access to the DSH instance and use HTTPS for remote deployments.
 
 ## Host actions
 
@@ -60,4 +63,4 @@ Chat Server endpoints: `POST /api/v1/dsh/pair`, `POST /api/v1/dsh/revoke`, `GET 
 
 - Installed and enabled in the current DSH profile; the **Chat** entry, iframe panel, and settings rows were checked in the running Web UI.
 - Pairing against a real Chat Server and a full import are left for the logged-in user to verify because the agent has no Chat Server credentials.
-- The embedded page relies on same-site cookies between the DSH origin and the configured Chat Server address; use the same host (for example both `127.0.0.1`) so the login cookie is sent inside the frame.
+- The embedded page uses a short-lived browser token for authenticated API requests when paired. Browser and network policies can still block iframe embedding; use the **Open in new tab** action if needed.

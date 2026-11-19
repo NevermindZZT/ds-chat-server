@@ -1,7 +1,6 @@
 {
   "meta": {
     "title": "Chat",
-    "description": "在 DSH 左侧导航中直接打开 DeepSeek Chat 网站聊天页面；插件设置可配置服务端地址和一次性配对码，并将当前会话导入 DSH Workspace。",
-    "detail": "docs/DETAIL.zh.md"
+    "description": "在 DSH 中使用自托管的 DeepSeek Chat：左侧「Chat」打开完整聊天页面，右侧边栏入口可在插件设置中开关。先在插件设置中填写 Chat Server 地址，再从网站「设置 → DSH 插件配对」生成一次性配对码并连接。聊天面板可将当前会话导入选定的 DSH Workspace；插件还提供模型、Skills 和 MCP 工具桥接。使用时 DSH 会向配置的 Chat Server 发送相关请求和数据，访问令牌由 DSH 凭据服务保存。"
   }
 }

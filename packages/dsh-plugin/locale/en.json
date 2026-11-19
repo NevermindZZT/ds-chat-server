@@ -1,7 +1,6 @@
 {
   "meta": {
     "title": "Chat",
-    "description": "Open the DeepSeek Chat website directly from DSH's left navigation. Plugin settings hold the server address and one-time pairing code, and the current conversation can be imported into a DSH Workspace.",
-    "detail": "docs/DETAIL.md"
+    "description": "Use your self-hosted DeepSeek Chat in DSH: open the full chat from Chat in the left navigation, or enable its entry in the right sidebar in plugin settings. Enter the Chat Server address in plugin settings, then generate a one-time code under Settings → DSH plugin pairing on the website and connect. Import the current conversation into a selected DSH Workspace; the plugin also bridges models, Skills and MCP tools. DSH sends the relevant requests and data to the configured Chat Server, and stores the access token in its credential service."
   }
 }

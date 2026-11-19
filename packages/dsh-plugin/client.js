@@ -129,9 +129,9 @@ window.__ModuleLoader__.load({
 .dcs-frame-wrap{position:relative;flex:1;min-height:0;background:var(--dsw-alias-bg-base)}
 .dcs-frame{display:block;width:100%;height:100%;border:0;background:var(--dsw-alias-bg-base)}
 .dcs-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;height:100%;padding:24px;text-align:center}
-.dcs-settings{display:grid;gap:0;max-width:680px;color:var(--dsw-alias-label-primary)}
+.dcs-settings{display:grid;gap:0;width:100%;min-width:0;color:var(--dsw-alias-label-primary)}
 .dcs-settings h3{margin:0;padding:0 0 6px;color:var(--dsw-alias-label-primary);font-size:14px;line-height:22px}
-.dcs-settings .dcs-hint{max-width:620px;margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
+.dcs-settings .dcs-hint{margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px;overflow-wrap:anywhere}
 .dcs-row{display:flex;align-items:center;gap:16px;min-height:60px;padding:12px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
 .dcs-row:last-child{border-bottom:none}
 .dcs-row-label{width:140px;flex:none;color:var(--dsw-alias-label-primary);font-size:13px;line-height:20px}
@@ -141,6 +141,7 @@ window.__ModuleLoader__.load({
 .dcs-row-copy span{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
 .dcs-input{flex:1;min-width:180px;box-sizing:border-box;font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:10px;padding:8px 10px;outline:none}
 .dcs-input:focus{border-color:var(--dsw-alias-brand-primary)}
+@media (max-width:600px){.dcs-settings .dcs-row{flex-wrap:wrap;gap:8px}.dcs-settings .dcs-row-label{width:100%}.dcs-settings .dcs-row-body{flex:1 1 100%}.dcs-settings .dcs-input{min-width:0;width:100%}}
 .dcs-switch{position:relative;display:inline-flex;align-items:center;width:40px;height:24px;padding:2px;border:0;border-radius:999px;background:var(--dsw-alias-state-idle-primary);cursor:pointer;transition:background .15s ease}
 .dcs-switch[aria-checked=true]{background:var(--dsw-alias-brand-primary)}
 .dcs-switch:disabled{opacity:.5;cursor:default}
