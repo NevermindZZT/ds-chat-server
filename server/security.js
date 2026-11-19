@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { pool, verifyPassword, changePassword } from './db.js'
+import { pool, verifyPassword, changeCredentials } from './db.js'
 
 const DATA_DIR = path.resolve(process.env.DATA_DIR ?? '.data')
 const COOKIE = 'chat_server_session'
@@ -81,11 +81,12 @@ export async function createSessionCookie(user) {
     JSON.stringify({ id: user.id, username: user.username, exp: expiresAt })
   ).toString('base64url')
   const token = `${payload}.${await sign(payload)}`
-  return `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_SECONDS}${process.env.COOKIE_SECURE === 'true' ? '; Secure' : ''}`
+  const sameSite = process.env.COOKIE_SECURE === 'true' ? 'None' : 'Lax'
+  return `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=${sameSite}; Max-Age=${SESSION_TTL_SECONDS}${process.env.COOKIE_SECURE === 'true' ? '; Secure' : ''}`
 }
 
 export const clearSessionCookie = () =>
-  `${COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${process.env.COOKIE_SECURE === 'true' ? '; Secure' : ''}`
+  `${COOKIE}=; Path=/; HttpOnly; SameSite=${process.env.COOKIE_SECURE === 'true' ? 'None' : 'Lax'}; Max-Age=0${process.env.COOKIE_SECURE === 'true' ? '; Secure' : ''}`
 
 async function userFromCookie(request) {
   const cookieHeader = request.headers.cookie ?? ''
@@ -161,15 +162,42 @@ export async function login(username, password) {
 }
 
 export async function updatePassword(userId, current, next) {
-  if (typeof next !== 'string' || next.length < 12 || next.length > 256) {
-    return { ok: false, message: 'Password must contain 12–256 characters.' }
+  if (typeof current !== 'string' || !current) {
+    return { ok: false, message: 'Current password is required.' }
+  }
+  if (typeof next !== 'string' || next.length < 8 || next.length > 256) {
+    return { ok: false, message: 'Password must contain 8–256 characters.' }
   }
   if (next === 'admin123') {
     return { ok: false, message: 'Choose a password other than the first-run password.' }
   }
-  return (await changePassword(userId, current, next))
-    ? { ok: true }
-    : { ok: false, message: 'Current password is incorrect.' }
+  return changeCredentials(userId, current, null, next)
+}
+
+export async function updateCredentials(userId, current, username, nextPassword) {
+  if (typeof current !== 'string' || !current) {
+    return { ok: false, message: 'Current password is required.' }
+  }
+  if (nextPassword !== undefined && nextPassword !== null && nextPassword !== '') {
+    if (typeof nextPassword !== 'string' || nextPassword.length < 8 || nextPassword.length > 256) {
+      return { ok: false, message: 'Password must contain 8–256 characters.' }
+    }
+    if (nextPassword === 'admin123') {
+      return { ok: false, message: 'Choose a password other than the first-run password.' }
+    }
+  }
+  return changeCredentials(userId, current, username, nextPassword || null)
+}
+
+export async function issueBrowserToken(userId) {
+  const token = randomBytes(32).toString('base64url')
+  const tokenHash = createHash('sha256').update(token).digest('hex')
+  const expiresAt = Date.now() + 12 * 60 * 60_000
+  await pool.query(
+    'INSERT INTO api_tokens(id,user_id,token_hash,label,expires_at) VALUES($1,$2,$3,$4,$5)',
+    [randomUUID(), userId, tokenHash, 'DSH browser session', expiresAt]
+  )
+  return { token, expiresAt: new Date(expiresAt).toISOString() }
 }
 
 export function issuePairCode(userId) {

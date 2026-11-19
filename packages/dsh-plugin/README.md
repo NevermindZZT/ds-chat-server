@@ -10,7 +10,22 @@ From npm:
 dsh plugin --profile web add @nevermindzzt/dsh-chat-server
 ```
 
+If your pnpm uses a China mirror such as `registry.npmmirror.com` and reports `No matching version found`, install from the official registry or the npm tarball:
+
+```sh
+dsh plugin --profile web add @nevermindzzt/dsh-chat-server --registry=https://registry.npmjs.org
+
+# or install the tarball directly
+dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.0.tgz
+```
+
 Or install `packages/dsh-plugin` as a local bundle in DSH **Plugins → Add plugin**, then enable **Chat**.
+
+If an older `@local/dsh-chat-server` bundle is still installed, disable it in **Plugins** and remove it, otherwise both **Chat** entries appear:
+
+```sh
+dsh plugin --profile web remove @local/dsh-chat-server
+```
 
 ## Use
 
@@ -35,7 +50,9 @@ No token or code is written to the plugin config, browser storage, or the iframe
 
 The page and iframe talk to the Host through `POST /api/dsh-chat-server/plugin` on the authenticated DSH Connection Fetch carrier:
 
-`get-settings`, `save-settings`, `status`, `pair`, `disconnect`, `sessions`, `session`, `create-session`, `save-session`, `delete-session`, `models`, `metrics`, `workspaces`, `import`, `stream`.
+`get-settings`, `save-settings`, `status`, `browser-token`, `pair`, `disconnect`, `sessions`, `session`, `create-session`, `save-session`, `delete-session`, `models`, `metrics`, `workspaces`, `import`, `stream`.
+
+When third-party cookies are blocked, `browser-token` obtains a 12-hour Chat Server bearer token and passes it to the iframe in the URL fragment; the website stores it in sessionStorage and uses it for same-origin API requests. The fragment is removed from the address bar immediately and is never sent to the server in the request URL.
 
 Chat Server endpoints: `POST /api/v1/dsh/pair`, `POST /api/v1/dsh/revoke`, `GET /api/v1/dsh/models`, Skills and MCP Gateways, session CRUD, metrics, `POST /api/anthropic/v1/messages`, and attachment reads during import. The Host never forwards a Client-supplied upstream URL or Authorization header.
 

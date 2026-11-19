@@ -210,18 +210,43 @@ export async function verifyPassword(username, password) {
   }
 }
 
-export async function changePassword(userId, currentPassword, nextPassword) {
+export async function changeCredentials(userId, currentPassword, nextUsername, nextPassword) {
   const { rows } = await pool.query('SELECT username FROM users WHERE id=$1', [userId])
-  if (!rows[0] || !(await verifyPassword(rows[0].username, currentPassword))) {
-    return false
+  const current = rows[0]
+  if (!current || !(await verifyPassword(current.username, currentPassword))) {
+    return { ok: false, message: 'Current password is incorrect.' }
   }
-  const salt = randomBytes(16)
-  const hash = Buffer.from(await scrypt(nextPassword, salt, 64))
-  await pool.query(
-    'UPDATE users SET password_salt=$2,password_hash=$3,must_change_password=0 WHERE id=$1',
-    [userId, salt, hash]
-  )
-  return true
+  const username = nextUsername?.trim() || current.username
+  if (username !== current.username) {
+    if (!/^[A-Za-z0-9_.-]{3,64}$/.test(username)) {
+      return {
+        ok: false,
+        message: 'Username must contain 3–64 letters, numbers, dots, underscores, or hyphens.',
+      }
+    }
+    const { rows: taken } = await pool.query(
+      'SELECT id FROM users WHERE username=$1 AND id<>$2',
+      [username, userId]
+    )
+    if (taken[0]) {
+      return { ok: false, message: 'That username is already in use.' }
+    }
+    await pool.query('UPDATE users SET username=$2 WHERE id=$1', [userId, username])
+  }
+  if (nextPassword) {
+    const salt = randomBytes(16)
+    const hash = Buffer.from(await scrypt(nextPassword, salt, 64))
+    await pool.query(
+      'UPDATE users SET password_salt=$2,password_hash=$3,must_change_password=0 WHERE id=$1',
+      [userId, salt, hash]
+    )
+  }
+  return { ok: true, username }
+}
+
+export async function changePassword(userId, currentPassword, nextPassword) {
+  const result = await changeCredentials(userId, currentPassword, null, nextPassword)
+  return result.ok ? true : false
 }
 
 export async function getSetting(userId, key) {

@@ -524,6 +524,22 @@ async function handlePluginRequest(ctx, state, request, invalidateSkills, mcpSta
       case 'status':
         value = { ...(await connectionStatus(ctx, baseUrl)), mcpToolCount: mcpState.disposers.size }
         break
+      case 'browser-token': {
+        const auth = await readAuth(ctx, baseUrl)
+        if (!auth) {
+          throw new PluginFailure('not-paired', 'Pair with the Chat Server first.', 409)
+        }
+        const data = await fetchJson(baseUrl, '/api/v1/auth/browser-session', {
+          method: 'POST',
+          headers: bearerHeaders(auth.token),
+          signal: request.signal,
+        })
+        if (!isRecord(data) || typeof data.token !== 'string') {
+          throw new PluginFailure('invalid-server-response', 'No browser token returned.', 502)
+        }
+        value = { token: data.token, expiresAt: data.expiresAt }
+        break
+      }
       case 'pair':
         value = await pairWithServer(ctx, baseUrl, input.pairCode, request.signal)
         mcpState.generation += 1

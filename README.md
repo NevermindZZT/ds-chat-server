@@ -29,7 +29,16 @@ docker run -d --name ds-chat-server --env-file .env \
   nevermindzzt/ds-chat-server:latest
 ```
 
-Open <http://127.0.0.1:8080>. Set a DeepSeek API Key in **Settings → Data**, or provide `DEEPSEEK_API_KEY` in `.env`. User-entered keys are encrypted at rest. SQLite, uploaded originals, Skills, and the generated encryption secret live in the persistent `chat_data` volume under `/data`.
+Open <http://127.0.0.1:8080>.
+
+For an image-only deployment that never builds locally, use [`compose.hub.yaml`](compose.hub.yaml):
+
+```sh
+docker compose -f compose.hub.yaml pull
+docker compose -f compose.hub.yaml up -d
+```
+
+`CHAT_SERVER_IMAGE_TAG` selects the image tag (default `0.2.0`; use `latest` for the newest release). Set a DeepSeek API Key in **Settings → Data**, or provide `DEEPSEEK_API_KEY` in `.env`. User-entered keys are encrypted at rest. SQLite, uploaded originals, Skills, and the generated encryption secret live in the persistent `chat_data` volume under `/data`.
 
 The Compose port binds to loopback by default. For public access, terminate TLS at a reverse proxy, set `COOKIE_SECURE=true` and `TRUST_PROXY=true` as appropriate, and review applicable content-safety and service-provider obligations. **Stop the container before copying the SQLite data volume** so the WAL is checkpointed. Back up the complete `chat_data` volume; it contains both `chat.sqlite` and attachment files.
 
@@ -37,10 +46,12 @@ The Compose port binds to loopback by default. For public access, terminate TLS 
 
 - **Chat Demo parity:** multi-conversation history, automatic titles, edit/regenerate/continue, branches, streaming, deep thinking, web search, URL reading, citations, files, content safety, ASR/TTS, Markdown/KaTeX/Mermaid, Chinese/English, light/dark, and responsive layouts.
 - **Server persistence:** account, encrypted API credentials, conversation branches, uploaded file originals, history ZIP import/export, and session metrics.
+- **Account:** change the administrator username and password in **Settings → Account**; the first-run password must be changed after the initial login. Passwords require at least 8 characters.
 - **MCP:** configure Streamable HTTP or allowlisted stdio servers in **Settings → MCP**; test discovery and enable tools individually by server. Connections are disabled until explicitly enabled. Stdio requires `MCP_STDIO_ALLOWLIST` and an executable present in the app container.
 - **Skills:** import a folder containing one or more `SKILL.md` files in **Settings → Skills**. In a conversation, use `/skill list`, `/skill <name>` to enable, or `/skill -<name>` to disable a Skill. Only enabled Skills are loaded into that conversation's model context.
 - **Context compaction:** configure the automatic trigger percentage, target percentage, and number of recent turns in **Settings → General**. Use `/compact [instructions]` in a conversation for manual compaction. Original messages remain visible; the model receives the saved summary plus unsummarized turns. Editing or switching branches invalidates the summary.
 - **Performance:** each session shows turn count, average first-token time, average output TPS, token totals, cache hit rate, and latest context-window usage. The model context window defaults to 128,000 tokens and can be adjusted with `DEEPSEEK_CONTEXT_WINDOW` (or a model-specific `CONTEXT_WINDOW_<MODEL>` variable).
+- **Cross-site embedding:** when DSH and the Chat Server are on different sites and the browser blocks third-party cookies, the DSH plugin requests a short-lived browser token so the embedded chat still authenticates.
 - **DSH:** the `@nevermindzzt/dsh-chat-server` plugin adds a **Chat** entry to DSH's left navigation that opens the Chat Server website inside DSH, plus an **import current conversation** action. Configure the address and one-time pairing code in the plugin settings. It also registers the Chat Server model provider, Skills provider, and MCP tool bridge.
 
 ## Development
@@ -66,6 +77,19 @@ Install the published plugin from npm:
 
 ```sh
 dsh plugin --profile web add @nevermindzzt/dsh-chat-server
+```
+
+If pnpm uses a China mirror that has not synced this package yet, add the official registry or install the tarball:
+
+```sh
+dsh plugin --profile web add @nevermindzzt/dsh-chat-server --registry=https://registry.npmjs.org
+dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.0.tgz
+```
+
+Remove an older `@local/dsh-chat-server` bundle to avoid duplicate **Chat** entries:
+
+```sh
+dsh plugin --profile web remove @local/dsh-chat-server
 ```
 
 Or install it through DSH **Plugins → Add plugin** using the package name `@nevermindzzt/dsh-chat-server`, then enable **Chat**. Open **插件 → Chat** to set the Chat Server address and one-time pairing code; changes are stored by DSH's credential service, not in ordinary plugin configuration. The same bundle can be installed from the local directory `packages/dsh-plugin`. See the [plugin README](packages/dsh-plugin/README.md) for details.

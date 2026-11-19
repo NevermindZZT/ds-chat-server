@@ -44,6 +44,8 @@ import {
   createSessionCookie,
   encryptSecret,
   updatePassword,
+  updateCredentials,
+  issueBrowserToken,
   getDeepSeekApiKey,
   issuePairCode,
   login,
@@ -96,7 +98,11 @@ app.addHook('preHandler', async (request, reply) => {
   request.chatUser = user
   if (
     user.mustChangePassword &&
-    !['/api/v1/auth/change-password', '/api/v1/auth/logout'].includes(request.url.split('?')[0])
+    ![
+      '/api/v1/auth/change-password',
+      '/api/v1/auth/change-credentials',
+      '/api/v1/auth/logout',
+    ].includes(request.url.split('?')[0])
   ) {
     return reply.code(403).send({
       error: {
@@ -204,6 +210,10 @@ app.post('/api/v1/auth/login', async (request, reply) => {
   return { user }
 })
 
+app.post('/api/v1/auth/browser-session', async (request) =>
+  issueBrowserToken(request.chatUser.id)
+)
+
 app.get('/api/v1/auth/me', async (request) => {
   const user = await authenticatedUser(request)
   return { authenticated: Boolean(user), user: user ?? null }
@@ -212,6 +222,26 @@ app.get('/api/v1/auth/me', async (request) => {
 app.post('/api/v1/auth/logout', async (_request, reply) => {
   reply.header('set-cookie', clearSessionCookie())
   return { ok: true }
+})
+
+app.post('/api/v1/auth/change-credentials', async (request, reply) => {
+  const { currentPassword, username, newPassword } = request.body ?? {}
+  const result = await updateCredentials(
+    request.chatUser.id,
+    currentPassword,
+    username,
+    newPassword
+  )
+  if (!result.ok) {
+    return errorResponse(reply, 400, result.message ?? 'Account update failed.')
+  }
+  const user = {
+    ...request.chatUser,
+    username: result.username,
+    mustChangePassword: newPassword ? false : request.chatUser.mustChangePassword,
+  }
+  reply.header('set-cookie', await createSessionCookie(user))
+  return { ok: true, user }
 })
 
 app.post('/api/v1/auth/change-password', async (request, reply) => {

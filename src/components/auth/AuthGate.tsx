@@ -79,7 +79,19 @@ export const AuthGate = ({ children }: { children: ReactNode }) => {
       if (result.user.mustChangePassword) {
         setPhase('password')
       } else {
-        await loadServerSettings()
+        try {
+          await loadServerSettings()
+        } catch (reason) {
+          if (String(reason).includes('(401)')) {
+            throw new Error(
+              text(
+                '登录成功，但浏览器未保存会话（401）。请检查 HTTPS/COOKIE_SECURE 配置，或在 DSH 插件中重新配对。',
+                'Signed in, but the browser did not keep the session (401). Check HTTPS/COOKIE_SECURE, or re-pair the DSH plugin.'
+              )
+            )
+          }
+          throw reason
+        }
         setPhase('ready')
       }
     } catch (reason) {
@@ -125,9 +137,7 @@ export const AuthGate = ({ children }: { children: ReactNode }) => {
   return (
     <main className={styles.page}>
       <section className={styles.card} aria-labelledby="auth-title">
-        <div className={styles.mark} aria-hidden="true">
-          D
-        </div>
+        <img className={styles.mark} src="/favicon.svg" alt="" aria-hidden="true" />
         <h1 id="auth-title">{text('DeepSeek Chat', 'DeepSeek Chat')}</h1>
         {phase === 'loading' ? (
           <p role="status">{text('正在连接服务…', 'Connecting to the server…')}</p>
@@ -175,8 +185,8 @@ export const AuthGate = ({ children }: { children: ReactNode }) => {
           <form onSubmit={submitPassword} className={styles.form}>
             <p>
               {text(
-                '首次登录必须设置新密码。新密码至少 12 个字符。',
-                'Set a new password before continuing. Use at least 12 characters.'
+                '首次登录必须设置新密码。新密码至少 8 个字符。',
+                'Set a new password before continuing. Use at least 8 characters.'
               )}
             </p>
             <label>
@@ -194,7 +204,7 @@ export const AuthGate = ({ children }: { children: ReactNode }) => {
               <input
                 type="password"
                 autoComplete="new-password"
-                minLength={12}
+                minLength={8}
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 required

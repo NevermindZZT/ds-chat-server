@@ -7,3 +7,8 @@
 - Use Node.js 24 or newer for development, builds, and runtime checks.
 - Docker Compose is a single Chat Server container with persistent SQLite storage; do not add a separate database container unless the user changes this requirement.
 - Do not run `git commit` or `git push` without a direct user instruction.
+
+## Commit approval
+
+- Do not run `git commit` or `git push` after making changes. Leave the working tree uncommitted and wait for the user to review the changes.
+- Commit or push only after the user explicitly instructs it in a later message.

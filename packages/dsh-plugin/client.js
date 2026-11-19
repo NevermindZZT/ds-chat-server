@@ -511,6 +511,7 @@ window.__ModuleLoader__.load({
       const [error, setError] = React.useState('')
       const [notice, setNotice] = React.useState('')
       const [frameKey, setFrameKey] = React.useState(0)
+      const [frameSrc, setFrameSrc] = React.useState('')
       const frameRef = React.useRef(null)
       const mounted = React.useRef(true)
 
@@ -550,6 +551,36 @@ window.__ModuleLoader__.load({
       React.useEffect(() => {
         void reload()
       }, [reload])
+
+      React.useEffect(() => {
+        let cancelled = false
+        setFrameSrc('')
+        if (!baseUrl) {
+          return undefined
+        }
+        if (!status?.connected) {
+          setFrameSrc(baseUrl)
+          return undefined
+        }
+        void (async () => {
+          try {
+            const result = await hostRequest('browser-token', {})
+            if (cancelled || typeof result?.token !== 'string') {
+              return
+            }
+            const url = new URL(baseUrl)
+            url.hash = new URLSearchParams({ dshToken: result.token }).toString()
+            setFrameSrc(url.toString())
+          } catch {
+            if (!cancelled) {
+              setFrameSrc(baseUrl)
+            }
+          }
+        })()
+        return () => {
+          cancelled = true
+        }
+      }, [baseUrl, status?.connected, frameKey])
 
       React.useEffect(() => {
         const onMessage = (event) => {
@@ -686,14 +717,20 @@ window.__ModuleLoader__.load({
           'div',
           { className: 'dcs-frame-wrap' },
           baseUrl
-            ? h('iframe', {
-                key: frameKey,
-                ref: frameRef,
-                className: 'dcs-frame',
-                src: baseUrl,
-                title: t('title'),
-                allow: 'clipboard-read; clipboard-write; microphone',
-              })
+            ? frameSrc
+              ? h('iframe', {
+                  key: frameKey,
+                  ref: frameRef,
+                  className: 'dcs-frame',
+                  src: frameSrc,
+                  title: t('title'),
+                  allow: 'clipboard-read; clipboard-write; microphone',
+                })
+              : h(
+                  'div',
+                  { className: 'dcs-empty' },
+                  h('p', { className: 'dcs-notice' }, t('working'))
+                )
             : h(
                 'div',
                 { className: 'dcs-empty' },

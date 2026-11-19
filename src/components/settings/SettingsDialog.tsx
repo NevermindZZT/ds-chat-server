@@ -33,6 +33,7 @@ import { Modal } from '../base/Modal.js'
 import { Select } from '../base/Select.js'
 import { showToast } from '../base/toastState.js'
 import { ApiKeyConfirm, ApiKeyField, useApiKeyEditor } from './ApiKeyField.js'
+import { AccountSetting } from './AccountSetting.js'
 import { ContextCompactionSetting } from './ContextCompactionSetting.js'
 import { ExtensionsSetting } from './ExtensionsSetting.js'
 import { closeSettings, useSettingsDialog, type SettingsSection } from './settingsDialogState.js'
@@ -53,6 +54,7 @@ const sections: { value: SettingsSection; label: TranslationKey; icon: ReactNode
     label: 'settingDialogAsideGeneralOptionLabel',
     icon: <IconSettingsOutline16 />,
   },
+  { value: 'account', label: 'account', icon: <IconSettingsOutline16 /> },
   { value: 'data', label: 'settingDialogAsideDataOptionLabel', icon: <IconDataOutline16 /> },
   { value: 'mcp', label: 'mcpServers', icon: <IconSettingsOutline16 /> },
   { value: 'skills', label: 'skills', icon: <IconDataOutline16 /> },
@@ -107,6 +109,8 @@ const SettingsContent = () => {
               <LocationSetting />
               <ContextCompactionSetting />
             </>
+          ) : section === 'account' ? (
+            <AccountSetting />
           ) : section === 'mcp' || section === 'skills' || section === 'dsh' ? (
             <ExtensionsSetting section={section} />
           ) : (
