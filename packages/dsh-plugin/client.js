@@ -114,9 +114,10 @@ window.__ModuleLoader__.load({
 .dcs-btn{font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap}
 .dcs-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2)}
 .dcs-btn:focus-visible,.dcs-select:focus-visible,.dcs-switch:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}
-.dcs-btn:disabled{opacity:.5;cursor:default}
+.dcs-btn:disabled{opacity:1;cursor:not-allowed;color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-2);border-color:var(--dsw-alias-border-l2)}
 .dcs-btn-primary{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary));border-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary));color:var(--dsw-alias-label-primary-foreground,#fff)}
-.dcs-btn-primary:hover:not(:disabled){filter:brightness(.96)}
+.dcs-btn-primary:hover:not(:disabled){background:var(--dsw-alias-button-primary-hover,var(--dsw-alias-brand-primary));border-color:var(--dsw-alias-button-primary-hover,var(--dsw-alias-brand-primary))}
+.dcs-btn-primary:disabled{color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-2);border-color:var(--dsw-alias-border-l2)}
 .dcs-select{display:flex;align-items:center;justify-content:space-between;gap:8px;font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:6px 8px;min-width:0;max-width:220px;text-align:left;cursor:pointer}
 .dcs-select:disabled{opacity:.5;cursor:default}
 .dcs-dropdown{position:relative;z-index:1000}
