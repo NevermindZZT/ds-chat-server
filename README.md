@@ -1,6 +1,6 @@
 # DeepSeek Chat
 
-[![Version](https://img.shields.io/badge/version-0.2.1-blue)](https://github.com/NevermindZZT/ds-chat-server/releases)
+[![Version](https://img.shields.io/badge/version-0.2.2-blue)](https://github.com/NevermindZZT/ds-chat-server/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/nevermindzzt/ds-chat-server)](https://hub.docker.com/r/nevermindzzt/ds-chat-server)
 [![npm](https://img.shields.io/npm/v/@nevermindzzt/dsh-chat-server)](https://www.npmjs.com/package/@nevermindzzt/dsh-chat-server)
@@ -38,7 +38,7 @@ docker compose -f compose.hub.yaml pull
 docker compose -f compose.hub.yaml up -d
 ```
 
-`CHAT_SERVER_IMAGE_TAG` selects the image tag (default `0.2.1`; use `latest` for the newest release). Set a DeepSeek API Key in **Settings → Data**, or provide `DEEPSEEK_API_KEY` in `.env`. User-entered keys are encrypted at rest. SQLite, uploaded originals, Skills, and the generated encryption secret live in the persistent `chat_data` volume under `/data`.
+`CHAT_SERVER_IMAGE_TAG` selects the image tag (default `0.2.2`; use `latest` for the newest release). Set a DeepSeek API Key in **Settings → Data**, or provide `DEEPSEEK_API_KEY` in `.env`. User-entered keys are encrypted at rest. SQLite, uploaded originals, Skills, and the generated encryption secret live in the persistent `chat_data` volume under `/data`.
 
 The Compose port binds to loopback by default. For public access, terminate TLS at a reverse proxy, set `COOKIE_SECURE=true` and `TRUST_PROXY=true` as appropriate, and review applicable content-safety and service-provider obligations. **Stop the container before copying the SQLite data volume** so the WAL is checkpointed. Back up the complete `chat_data` volume; it contains both `chat.sqlite` and attachment files.
 
@@ -83,7 +83,7 @@ If pnpm uses a China mirror that has not synced this package yet, add the offici
 
 ```sh
 dsh plugin --profile web add @nevermindzzt/dsh-chat-server --registry=https://registry.npmjs.org
-dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.1.tgz
+dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.2.tgz
 ```
 
 Remove an older `@local/dsh-chat-server` bundle to avoid duplicate **Chat** entries:
@@ -112,8 +112,8 @@ Pushing a `v*` tag runs [`.github/workflows/release.yml`](.github/workflows/rele
 Configure these repository secrets first: `DOCKERHUB_USERNAME` (`NevermindZZT`), `DOCKERHUB_TOKEN` (Docker Hub access token), and `NPM_TOKEN` (npm automation token for the `@nevermindzzt` scope). The Docker Hub repository and npm scope must exist for the first release.
 
 ```sh
-git tag v0.2.1
-git push origin v0.2.1
+git tag v0.2.2
+git push origin v0.2.2
 ```
 
 ## License

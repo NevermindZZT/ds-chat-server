@@ -192,7 +192,7 @@ async function cleanupUnusedAttachments(userId) {
   }
 }
 
-app.get('/api/v1/health', async () => ({ ok: true, version: '0.2.1' }))
+app.get('/api/v1/health', async () => ({ ok: true, version: '0.2.2' }))
 
 app.post('/api/v1/auth/login', async (request, reply) => {
   if (loginIsLimited(request.ip)) {

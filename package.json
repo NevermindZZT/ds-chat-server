@@ -1,6 +1,6 @@
 {
   "name": "ds-chat-server",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Self-hosted DeepSeek Chat with MCP, Skills, and a DSH plugin.",
   "license": "MIT",
   "private": true,
