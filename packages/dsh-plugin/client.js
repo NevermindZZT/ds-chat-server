@@ -7,6 +7,7 @@ window.__ModuleLoader__.load({
     const ROUTE = 'api/dsh-chat-server/plugin'
     const PANEL_ID = 'chat-server'
     const PACKAGE_NAME = '@nevermindzzt/dsh-chat-server'
+    const RIGHTBAR_KIND = `${PACKAGE_NAME}/rightbar-chat`
 
     const zh = {
       panel: 'Chat',
@@ -35,8 +36,11 @@ window.__ModuleLoader__.load({
       frameUnavailable: '请先在插件设置中填写 Chat Server 地址。',
       openSettings: '打开插件设置',
       openExternal: '新标签打开',
-      openSidebar: '在侧栏打开',
-      frameHint: '如果面板空白，可能是浏览器拒绝嵌入该页面；请用新标签或侧栏打开。',
+      rightSidebarEntry: '在右侧边栏显示 Chat 入口',
+      rightSidebarEntryDescription: '在 DSH 右侧边栏的入口页中显示 Chat Server。',
+      rightSidebarSaved: '右侧边栏设置已保存',
+      rightSidebarPairRequired: '请先在插件设置中连接 Chat Server。',
+      loadingChatServer: '正在连接 Chat Server…',
       remoteHint:
         '当前 DSH 通过 {host} 访问，127.0.0.1 指向你的电脑。如果 Chat Server 在同一台服务器上，请改用 {suggested}。',
       useSuggested: '使用 {suggested}',
@@ -79,9 +83,11 @@ window.__ModuleLoader__.load({
       frameUnavailable: 'Set the Chat Server address in the plugin settings first.',
       openSettings: 'Open plugin settings',
       openExternal: 'Open in new tab',
-      openSidebar: 'Open in sidebar',
-      frameHint:
-        'If the panel stays blank, the browser may refuse to embed the page; use a new tab or the sidebar instead.',
+      rightSidebarEntry: 'Show Chat in the right sidebar',
+      rightSidebarEntryDescription: 'Add a Chat Server entry to the DSH right-sidebar guide.',
+      rightSidebarSaved: 'Right-sidebar setting saved',
+      rightSidebarPairRequired: 'Connect to the Chat Server in plugin settings first.',
+      loadingChatServer: 'Connecting to Chat Server…',
       remoteHint:
         'DSH is reached via {host}, so 127.0.0.1 points to your own computer. If Chat Server runs on the same server, use {suggested}.',
       useSuggested: 'Use {suggested}',
@@ -99,38 +105,52 @@ window.__ModuleLoader__.load({
     }
 
     const CSS = `
-.dcs-root{display:flex;flex-direction:column;box-sizing:border-box;height:100%;min-height:0;color:inherit;background:var(--dsw-alias-bg-base,#111);font:inherit}
-.dcs-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:none;padding:8px 16px;border-bottom:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.08)}
-.dcs-title{font-size:13px;font-weight:600;margin:0;color:inherit}
-.dcs-badge{font-size:12px;color:inherit;border:1px solid rgba(128,128,128,.5);border-radius:999px;padding:2px 8px}
-.dcs-badge-on{color:#5b8cff;border-color:#5b8cff}
+.dcs-root{display:flex;flex-direction:column;box-sizing:border-box;height:100%;min-height:0;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-base);font:inherit}
+.dcs-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:none;padding:8px 16px;border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1)}
+.dcs-title{font-size:13px;font-weight:600;margin:0;color:var(--dsw-alias-label-primary)}
+.dcs-badge{font-size:12px;color:var(--dsw-alias-label-secondary);border:1px solid var(--dsw-alias-border-l2);border-radius:999px;padding:2px 8px}
+.dcs-badge-on{color:var(--dsw-alias-state-success-primary);border-color:var(--dsw-alias-state-success-primary)}
 .dcs-spacer{flex:1}
-.dcs-btn{font:inherit;font-size:13px;color:inherit;background:rgba(128,128,128,.14);border:1px solid rgba(128,128,128,.5);border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap}
-.dcs-btn:hover:not(:disabled){background:rgba(128,128,128,.24)}
+.dcs-btn{font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.dcs-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2)}
+.dcs-btn:focus-visible,.dcs-select:focus-visible,.dcs-switch:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}
 .dcs-btn:disabled{opacity:.5;cursor:default}
-.dcs-btn-primary{background:#3964fe;border-color:#3964fe;color:#fff}
-.dcs-btn-primary:hover:not(:disabled){background:#2f57e6}
-.dcs-select{display:flex;align-items:center;justify-content:space-between;gap:8px;font:inherit;font-size:13px;color:inherit;background:rgba(128,128,128,.14);border:1px solid rgba(128,128,128,.5);border-radius:8px;padding:6px 8px;min-width:0;max-width:220px;text-align:left;cursor:pointer}
+.dcs-btn-primary{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary));border-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary));color:var(--dsw-alias-label-primary-foreground,#fff)}
+.dcs-btn-primary:hover:not(:disabled){filter:brightness(.96)}
+.dcs-select{display:flex;align-items:center;justify-content:space-between;gap:8px;font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:6px 8px;min-width:0;max-width:220px;text-align:left;cursor:pointer}
 .dcs-select:disabled{opacity:.5;cursor:default}
 .dcs-dropdown{position:relative;z-index:1000}
-.dcs-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:100;min-width:100%;max-width:320px;max-height:280px;overflow:auto;padding:4px;border:1px solid rgba(128,128,128,.45);border-radius:10px;background:var(--dsw-alias-bg-overlay,#1f2329);color:var(--dsw-alias-label-primary,#ededed);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.dcs-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:1000;min-width:100%;max-width:320px;max-height:280px;overflow:auto;padding:4px;border:1px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .dcs-menu button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;box-sizing:border-box;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;font-size:13px;text-align:left;cursor:pointer;white-space:nowrap}
-.dcs-menu button:hover,.dcs-menu button:focus-visible{background:rgba(128,128,128,.22);outline:none}
-.dcs-check{color:#5b8cff}
-.dcs-notice{font-size:12px;line-height:18px;color:inherit;opacity:.78;margin:0}
-.dcs-error{font-size:12px;line-height:18px;color:#ff6b6b;margin:0}
-.dcs-frame-wrap{position:relative;flex:1;min-height:0;background:var(--dsw-alias-bg-base,#111)}
-.dcs-frame{display:block;width:100%;height:100%;border:0;background:#fff}
+.dcs-menu button:hover,.dcs-menu button:focus-visible{background:var(--dsw-alias-bg-layer-2);outline:none}
+.dcs-check{color:var(--dsw-alias-brand-primary)}
+.dcs-notice{font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary);margin:0}
+.dcs-error{font-size:12px;line-height:18px;color:var(--dsw-alias-state-error-primary);margin:0}
+.dcs-frame-wrap{position:relative;flex:1;min-height:0;background:var(--dsw-alias-bg-base)}
+.dcs-frame{display:block;width:100%;height:100%;border:0;background:var(--dsw-alias-bg-base)}
 .dcs-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;height:100%;padding:24px;text-align:center}
-.dcs-settings{display:grid;gap:0;max-width:680px;color:inherit}
-.dcs-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:58px;padding:12px 0;border-bottom:1px solid rgba(128,128,128,.3)}
+.dcs-settings{display:grid;gap:0;max-width:680px;color:var(--dsw-alias-label-primary)}
+.dcs-settings h3{margin:0;padding:0 0 6px;color:var(--dsw-alias-label-primary);font-size:14px;line-height:22px}
+.dcs-settings .dcs-hint{max-width:620px;margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
+.dcs-row{display:flex;align-items:center;gap:16px;min-height:60px;padding:12px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
 .dcs-row:last-child{border-bottom:none}
-.dcs-row-label{width:120px;flex:none;font-size:13px;color:inherit}
-.dcs-row-body{display:flex;align-items:center;gap:8px;flex:1;min-width:220px;flex-wrap:wrap}
-.dcs-input{flex:1;min-width:180px;box-sizing:border-box;font:inherit;font-size:13px;color:inherit;background:rgba(128,128,128,.1);border:1px solid rgba(128,128,128,.5);border-radius:8px;padding:8px 10px;outline:none}
-.dcs-input:focus{border-color:#5b8cff}
-.dcs-hint{font-size:12px;color:inherit;opacity:.72;line-height:18px;margin:0 0 12px}
-.dcs-frame-fallback{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 16px;border-bottom:1px solid rgba(128,128,128,.3);font-size:12px}
+.dcs-row-label{width:140px;flex:none;color:var(--dsw-alias-label-primary);font-size:13px;line-height:20px}
+.dcs-row-body{display:flex;align-items:center;gap:8px;flex:1;min-width:0;flex-wrap:wrap}
+.dcs-row-copy{display:grid;flex:1;min-width:0;gap:3px}
+.dcs-row-copy strong{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:500;line-height:20px}
+.dcs-row-copy span{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
+.dcs-input{flex:1;min-width:180px;box-sizing:border-box;font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:10px;padding:8px 10px;outline:none}
+.dcs-input:focus{border-color:var(--dsw-alias-brand-primary)}
+.dcs-switch{position:relative;display:inline-flex;align-items:center;width:40px;height:24px;padding:2px;border:0;border-radius:999px;background:var(--dsw-alias-state-idle-primary);cursor:pointer;transition:background .15s ease}
+.dcs-switch[aria-checked=true]{background:var(--dsw-alias-brand-primary)}
+.dcs-switch:disabled{opacity:.5;cursor:default}
+.dcs-switch-thumb{width:20px;height:20px;border-radius:50%;background:var(--dsw-alias-bg-overlay);box-shadow:0 1px 3px color-mix(in srgb,var(--dsw-alias-label-primary) 20%,transparent);transition:transform .15s ease}
+.dcs-switch[aria-checked=true] .dcs-switch-thumb{transform:translateX(16px)}
+.dcs-hint{font-size:12px;color:var(--dsw-alias-label-secondary);line-height:18px;margin:0 0 12px}
+.dcs-frame-fallback{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 16px;border-bottom:1px solid var(--dsw-alias-border-l1);font-size:12px}
+.dcs-rightbar-root{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;overflow:hidden;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-base);font:inherit}
+.dcs-rightbar-message{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center}
+.dcs-sidebar-frame{display:block;flex:1;width:100%;height:100%;min-height:0;border:0;background:var(--dsw-alias-bg-base)}
 `
 
     function requestUrl() {
@@ -210,9 +230,11 @@ window.__ModuleLoader__.load({
 
     function ConfigPage(props) {
       const t = (key, vars) => props.t(key, vars)
+      const setRightSidebarEntry = props.setRightSidebarEntry
       const [baseUrl, setBaseUrl] = React.useState('')
       const [pairCode, setPairCode] = React.useState('')
       const [status, setStatus] = React.useState(null)
+      const [showRightSidebar, setShowRightSidebar] = React.useState(true)
       const [error, setError] = React.useState('')
       const [notice, setNotice] = React.useState('')
       const [busy, setBusy] = React.useState(false)
@@ -234,6 +256,9 @@ window.__ModuleLoader__.load({
           ])
           if (mounted.current) {
             setBaseUrl(String(settings?.baseUrl || ''))
+            const showRightSidebar = settings?.showRightSidebar !== false
+            setShowRightSidebar(showRightSidebar)
+            setRightSidebarEntry?.(showRightSidebar)
             setStatus(connection)
             setError('')
             setLoaded(true)
@@ -244,7 +269,7 @@ window.__ModuleLoader__.load({
             setLoaded(true)
           }
         }
-      }, [])
+      }, [setRightSidebarEntry])
 
       React.useEffect(() => {
         void refresh()
@@ -293,6 +318,17 @@ window.__ModuleLoader__.load({
           }
         })
 
+      const toggleRightSidebar = (enabled) =>
+        run(async () => {
+          const result = await hostRequest('save-settings', { showRightSidebar: enabled })
+          const next = result?.showRightSidebar !== false
+          if (mounted.current) {
+            setShowRightSidebar(next)
+            setRightSidebarEntry?.(next)
+            setNotice(t('rightSidebarSaved'))
+          }
+        })
+
       const disconnect = () =>
         run(async () => {
           await hostRequest('disconnect', {})
@@ -338,6 +374,29 @@ window.__ModuleLoader__.load({
               },
               busy ? t('saving') : t('save')
             )
+          )
+        ),
+        h(
+          'div',
+          { className: 'dcs-row' },
+          h(
+            'div',
+            { className: 'dcs-row-copy' },
+            h('strong', null, t('rightSidebarEntry')),
+            h('span', null, t('rightSidebarEntryDescription'))
+          ),
+          h(
+            'button',
+            {
+              type: 'button',
+              role: 'switch',
+              className: 'dcs-switch',
+              'aria-label': t('rightSidebarEntry'),
+              'aria-checked': showRightSidebar,
+              disabled: busy || !loaded,
+              onClick: () => void toggleRightSidebar(!showRightSidebar),
+            },
+            h('span', { className: 'dcs-switch-thumb' })
           )
         ),
         isLoopback && remoteHost
@@ -445,6 +504,7 @@ window.__ModuleLoader__.load({
       status: null,
       workspaces: [],
       workspaceId: '',
+      showRightSidebar: true,
     }
 
     function ensurePersistentFrame() {
@@ -534,8 +594,76 @@ window.__ModuleLoader__.load({
       )
     }
 
+    function RightSidebarChat(props) {
+      const translate = props.t
+      const [src, setSrc] = React.useState('')
+      const [error, setError] = React.useState('')
+      const [loading, setLoading] = React.useState(true)
+      const [attempt, setAttempt] = React.useState(0)
+      React.useEffect(() => {
+        let cancelled = false
+        setLoading(true)
+        setError('')
+        void (async () => {
+          try {
+            const settings = await hostRequest('get-settings', {})
+            const baseUrl = String(settings?.baseUrl || '')
+            if (!baseUrl) {
+              throw new Error(translate('frameUnavailable'))
+            }
+            const result = await hostRequest('browser-token', {})
+            if (cancelled || typeof result?.token !== 'string') {
+              return
+            }
+            const url = new URL(baseUrl)
+            url.hash = new URLSearchParams({ dshToken: result.token }).toString()
+            setSrc(url.toString())
+          } catch (reason) {
+            if (!cancelled) {
+              const message = errorText(reason)
+              setError(message.includes('Pair with') ? translate('rightSidebarPairRequired') : message)
+            }
+          } finally {
+            if (!cancelled) {
+              setLoading(false)
+            }
+          }
+        })()
+        return () => {
+          cancelled = true
+        }
+      }, [attempt, translate])
+      return h(
+        'div',
+        { className: 'dcs-rightbar-root' },
+        h('style', null, CSS),
+        loading
+          ? h('p', { className: 'dcs-notice dcs-rightbar-message', role: 'status' }, translate('loadingChatServer'))
+          : error
+            ? h(
+                'div',
+                { className: 'dcs-rightbar-message' },
+                h('p', { className: 'dcs-error', role: 'alert' }, error),
+                h('button', {
+                  type: 'button',
+                  className: 'dcs-btn',
+                  onClick: () => setAttempt((value) => value + 1),
+                }, translate('retry'))
+              )
+            : src
+              ? h('iframe', {
+                  className: 'dcs-sidebar-frame',
+                  src,
+                  title: translate('title'),
+                  allow: 'clipboard-read; clipboard-write; microphone',
+                })
+              : null
+      )
+    }
+
     function ChatPanel(props) {
       const t = (key, vars) => props.t(key, vars)
+      const setRightSidebarEntry = props.setRightSidebarEntry
       const [baseUrl, setBaseUrl] = React.useState(() => panelCache.baseUrl)
       const [status, setStatus] = React.useState(() => panelCache.status)
       const [sessionId, setSessionId] = React.useState('')
@@ -584,6 +712,8 @@ window.__ModuleLoader__.load({
             panelCache.workspaceId = selected
             return selected
           })
+          const showEntry = settings?.showRightSidebar !== false
+          setRightSidebarEntry?.(showEntry)
           panelCache.baseUrl = nextBaseUrl
           panelCache.status = connection
           panelCache.workspaces = nextList
@@ -594,7 +724,7 @@ window.__ModuleLoader__.load({
             setError(errorText(reason))
           }
         }
-      }, [])
+      }, [setRightSidebarEntry])
 
       React.useEffect(() => {
         void reload()
@@ -792,17 +922,6 @@ window.__ModuleLoader__.load({
                   },
                   t('openExternal')
                 ),
-                props.openInSidebar
-                  ? h(
-                      'button',
-                      {
-                        type: 'button',
-                        className: 'dcs-btn',
-                        onClick: () => props.openInSidebar(baseUrl),
-                      },
-                      t('openSidebar')
-                    )
-                  : null
               )
             : null
         ),
@@ -839,17 +958,87 @@ window.__ModuleLoader__.load({
       apply(ctx) {
         ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-chat-server: locale')
         const t = ctx.locale.bind(NS)
-        const sidebarRight = ctx.get('sidebarRight')
-        const openInSidebar = (url) => {
+
+        // The right sidebar is optional: every step below is guarded so a missing
+        // service or slot can never take the rest of this plugin down with it.
+        let showRightSidebarEntry = panelCache.showRightSidebar !== false
+        let syncRightSidebarType = null
+        const setRightSidebarEntry = (enabled) => {
+          const next = enabled !== false
+          const changed = next !== showRightSidebarEntry
+          showRightSidebarEntry = next
+          panelCache.showRightSidebar = next
+          if (!changed || syncRightSidebarType === null) {
+            return
+          }
           try {
-            sidebarRight?.openTab?.('browser', { params: { url } })
+            syncRightSidebarType(next)
           } catch {
-            /* The Browser tab kind may be disabled in this profile. */
+            /* Keep the previous entry state when the sidebar registry rejects it. */
           }
         }
+
+        ctx.inject(['sidebarRightTabs'], (owner) => {
+          let disposeType
+          try {
+            const sidebarTabs = owner.get('sidebarRightTabs')
+            const sync = (withGuide) => {
+              disposeType?.()
+              disposeType = sidebarTabs.register({
+                id: PACKAGE_NAME,
+                kind: RIGHTBAR_KIND,
+                priority: 'extension',
+                keepMounted: true,
+                title: () => t('title'),
+                ...(withGuide
+                  ? {
+                      guide: [
+                        {
+                          id: 'chat-server',
+                          order: 35,
+                          title: () => t('title'),
+                          description: () => t('rightSidebarEntryDescription'),
+                          icon: PanelIcon,
+                        },
+                      ],
+                    }
+                  : {}),
+              })
+            }
+            sync(showRightSidebarEntry)
+            syncRightSidebarType = sync
+            const ownerRegister = owner.slots.register.bind(owner.slots)
+            owner.slots.inject('sidebar.right.pane.tab', () =>
+              ownerRegister(
+                { name: 'sidebar.right.pane.tab', key: PACKAGE_NAME, locale: NS },
+                RightSidebarChat
+              )
+            )
+          } catch {
+            syncRightSidebarType = null
+          }
+          owner.effect(
+            () => () => {
+              syncRightSidebarType = null
+              disposeType?.()
+              disposeType = undefined
+            },
+            'dsh-chat-server: right sidebar Chat tab'
+          )
+        })
+
+        void hostRequest('get-settings', {})
+          .then((settings) => setRightSidebarEntry(settings?.showRightSidebar !== false))
+          .catch(() => {})
+
         ctx.slots.inject('main', () =>
           ctx.slots.register(
-            { name: 'main', key: PANEL_ID, locale: NS, inject: () => ({ openInSidebar }) },
+            {
+              name: 'main',
+              key: PANEL_ID,
+              locale: NS,
+              inject: () => ({ setRightSidebarEntry }),
+            },
             ChatPanel
           )
         )
@@ -867,7 +1056,12 @@ window.__ModuleLoader__.load({
         )
         ctx.slots.inject('plugins.bundle.config', () =>
           ctx.slots.register(
-            { name: 'plugins.bundle.config', key: PACKAGE_NAME, locale: NS },
+            {
+              name: 'plugins.bundle.config',
+              key: PACKAGE_NAME,
+              locale: NS,
+              inject: () => ({ setRightSidebarEntry }),
+            },
             ConfigPage
           )
         )

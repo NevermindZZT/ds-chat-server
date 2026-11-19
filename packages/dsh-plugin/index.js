@@ -507,18 +507,24 @@ async function handlePluginRequest(ctx, state, request, invalidateSkills, mcpSta
 
     let value
     switch (input.action) {
-      case 'get-settings':
-        value = { baseUrl: state.baseUrl }
+      case 'get-settings': {
+        const settings = await resolveStoredSettings(ctx, state.baseUrl)
+        state.baseUrl = settings.baseUrl
+        value = settings
         break
+      }
       case 'save-settings': {
-        const next = await saveStoredBaseUrl(ctx, input.baseUrl)
-        state.baseUrl = next
-        await ctx.credentials.deleteRecord(TOKEN_RECORD_KEY).catch(() => {})
-        mcpState.generation += 1
-        disposeMcpTools(mcpState)
-        signalModelCatalog(ctx)
-        invalidateSkills()
-        value = { baseUrl: next, paired: false }
+        const previous = await resolveStoredSettings(ctx, state.baseUrl)
+        const settings = await saveStoredSettings(ctx, input, previous)
+        state.baseUrl = settings.baseUrl
+        if (settings.baseUrl !== previous.baseUrl) {
+          await ctx.credentials.deleteRecord(TOKEN_RECORD_KEY).catch(() => {})
+          mcpState.generation += 1
+          disposeMcpTools(mcpState)
+          signalModelCatalog(ctx)
+          invalidateSkills()
+        }
+        value = { ...settings, paired: settings.baseUrl === previous.baseUrl }
         break
       }
       case 'status':
@@ -660,25 +666,31 @@ async function handlePluginRequest(ctx, state, request, invalidateSkills, mcpSta
   }
 }
 
-async function resolveStoredBaseUrl(ctx, fallback) {
+async function resolveStoredSettings(ctx, fallbackBaseUrl) {
   const record = await ctx.credentials.readRecord(BASE_URL_RECORD_KEY)
-  if (record?.kind !== 'grant' || !isRecord(record.payload)) {
-    return fallback
+  const payload = record?.kind === 'grant' && isRecord(record.payload) ? record.payload : {}
+  const baseUrl =
+    typeof payload.baseUrl === 'string' ? normalizeBaseUrl(payload.baseUrl) : fallbackBaseUrl
+  return {
+    baseUrl,
+    showRightSidebar: payload.showRightSidebar !== false,
   }
-  if (typeof record.payload.baseUrl !== 'string') {
-    return fallback
-  }
-  return normalizeBaseUrl(record.payload.baseUrl)
 }
 
-async function saveStoredBaseUrl(ctx, input) {
-  const baseUrl = normalizeBaseUrl(typeof input === 'string' ? input.trim() : '')
-  await ctx.credentials
-    .modifyRecord(BASE_URL_RECORD_KEY, async () => ({ kind: 'grant', payload: { baseUrl } }))
-    .catch(() => {
-      ctx.logger.warn('dsh-chat-server: failed to persist the server address')
-    })
-  return baseUrl
+async function resolveStoredBaseUrl(ctx, fallback) {
+  return (await resolveStoredSettings(ctx, fallback)).baseUrl
+}
+
+async function saveStoredSettings(ctx, input, current) {
+  const baseUrl =
+    typeof input.baseUrl === 'string' ? normalizeBaseUrl(input.baseUrl.trim()) : current.baseUrl
+  const showRightSidebar =
+    typeof input.showRightSidebar === 'boolean' ? input.showRightSidebar : current.showRightSidebar
+  await ctx.credentials.modifyRecord(BASE_URL_RECORD_KEY, async () => ({
+    kind: 'grant',
+    payload: { baseUrl, showRightSidebar },
+  }))
+  return { baseUrl, showRightSidebar }
 }
 
 async function connectionStatus(ctx, baseUrl) {
