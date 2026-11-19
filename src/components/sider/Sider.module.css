@@ -22,9 +22,24 @@
   flex-shrink: 0;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.logo {
+  display: block;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+}
+
 .appName {
   min-width: 0;
-  padding-left: 4px;
   overflow: hidden;
   font-size: 20px;
   line-height: 22px;

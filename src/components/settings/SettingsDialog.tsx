@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useRef, useState, type ReactNode } from 'react'
+import { appVersion } from '../../app/version.js'
 import {
   IconDarkOutline16,
   IconDataOutline16,
@@ -83,6 +84,7 @@ const SettingsContent = () => {
         closable
         className={styles.dialog}
         mainClassName={styles.dialogMain}
+        footer={<span className={styles.version}>v{appVersion}</span>}
         onClose={() => {
           if (!historyDelete.busy) {
             closeSettings()
