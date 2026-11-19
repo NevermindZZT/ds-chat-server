@@ -85,7 +85,21 @@ const ChatApp = () => {
     } catch {
       /* No usable referrer; the session id is non-secret navigation state. */
     }
-    window.parent.postMessage({ type: 'dsh-chat-session', sessionId: activeId }, target)
+    const sendSession = (origin: string) => {
+      window.parent.postMessage({ type: 'dsh-chat-session', sessionId: activeId }, origin)
+    }
+    const onRequest = (event: MessageEvent) => {
+      if (event.source !== window.parent || event.data?.type !== 'dsh-chat-session-request') {
+        return
+      }
+      if (target !== '*' && event.origin !== target) {
+        return
+      }
+      sendSession(event.origin)
+    }
+    window.addEventListener('message', onRequest)
+    sendSession(target)
+    return () => window.removeEventListener('message', onRequest)
   }, [activeId])
 
   return (

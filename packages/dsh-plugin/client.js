@@ -499,6 +499,40 @@ window.__ModuleLoader__.load({
       baseUrl: '',
       src: '',
       expiresAt: 0,
+      sessionId: '',
+    }
+
+    const sessionListeners = new Set()
+    function updateFrameSession(sessionId) {
+      persistentFrame.sessionId = sessionId
+      for (const listener of sessionListeners) {
+        listener(sessionId)
+      }
+    }
+
+    function handleFrameMessage(event) {
+      if (!persistentFrame.frame || event.source !== persistentFrame.frame.contentWindow) {
+        return
+      }
+      let origin
+      try {
+        origin = new URL(persistentFrame.src).origin
+      } catch {
+        return
+      }
+      if (event.origin !== origin || event.data?.type !== 'dsh-chat-session') {
+        return
+      }
+      updateFrameSession(typeof event.data.sessionId === 'string' ? event.data.sessionId : '')
+    }
+
+    function requestFrameSession() {
+      try {
+        const origin = new URL(persistentFrame.src).origin
+        persistentFrame.frame?.contentWindow?.postMessage({ type: 'dsh-chat-session-request' }, origin)
+      } catch {
+        // The frame is not ready or has no valid URL yet.
+      }
     }
 
     const panelCache = {
@@ -668,7 +702,7 @@ window.__ModuleLoader__.load({
       const setRightSidebarEntry = props.setRightSidebarEntry
       const [baseUrl, setBaseUrl] = React.useState(() => panelCache.baseUrl)
       const [status, setStatus] = React.useState(() => panelCache.status)
-      const [sessionId, setSessionId] = React.useState('')
+      const [sessionId, setSessionId] = React.useState(() => persistentFrame.sessionId)
       const [workspaces, setWorkspaces] = React.useState(() => panelCache.workspaces)
       const [workspaceId, setWorkspaceId] = React.useState(() => panelCache.workspaceId)
       const [importing, setImporting] = React.useState(false)
@@ -681,7 +715,6 @@ window.__ModuleLoader__.load({
           ? persistentFrame.src
           : ''
       )
-      const frameRef = React.useRef(null)
       const slotRef = React.useRef(null)
       const mounted = React.useRef(true)
 
@@ -790,9 +823,10 @@ window.__ModuleLoader__.load({
         }
         const overlay = ensurePersistentFrame()
         if (overlay.frame.getAttribute('src') !== frameSrc) {
+          updateFrameSession('')
           overlay.frame.src = frameSrc
         }
-        frameRef.current = overlay.frame
+        requestFrameSession()
         let frameRequest = 0
         const place = () => {
           const rect = slot.getBoundingClientRect()
@@ -811,22 +845,14 @@ window.__ModuleLoader__.load({
         return () => {
           cancelAnimationFrame(frameRequest)
           overlay.host.style.display = 'none'
-          frameRef.current = null
         }
       }, [frameSrc])
 
       React.useEffect(() => {
-        const onMessage = (event) => {
-          if (!frameRef.current || event.source !== frameRef.current.contentWindow) {
-            return
-          }
-          const data = event.data
-          if (data && data.type === 'dsh-chat-session') {
-            setSessionId(typeof data.sessionId === 'string' ? data.sessionId : '')
-          }
-        }
-        window.addEventListener('message', onMessage)
-        return () => window.removeEventListener('message', onMessage)
+        sessionListeners.add(setSessionId)
+        setSessionId(persistentFrame.sessionId)
+        requestFrameSession()
+        return () => sessionListeners.delete(setSessionId)
       }, [])
 
       const importSession = async () => {
@@ -906,7 +932,7 @@ window.__ModuleLoader__.load({
                     type: 'button',
                     className: 'dcs-btn',
                     onClick: () => {
-                      setSessionId('')
+                      updateFrameSession('')
                       persistentFrame.expiresAt = 0
                       setFrameKey((value) => value + 1)
                     },
@@ -959,6 +985,10 @@ window.__ModuleLoader__.load({
       inject: ['slots', 'locale'],
       apply(ctx) {
         ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-chat-server: locale')
+        ctx.effect(() => {
+          window.addEventListener('message', handleFrameMessage)
+          return () => window.removeEventListener('message', handleFrameMessage)
+        }, 'dsh-chat-server: frame session tracking')
         const t = ctx.locale.bind(NS)
 
         // The right sidebar is optional: every step below is guarded so a missing
