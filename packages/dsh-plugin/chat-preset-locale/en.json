@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Chat agent preset",
+    "description": "A DSH conversation preset with a concise prompt and common file and web tools."
+  }
+}

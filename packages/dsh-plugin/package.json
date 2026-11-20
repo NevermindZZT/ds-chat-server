@@ -9,16 +9,23 @@
     ".": "./index.js",
     "./client": "./client.js",
     "./locale/*.json": "./locale/*.json",
-    "./icon": "./icon.svg"
+    "./icon": "./icon.svg",
+    "./chat-policy": "./chat-policy.js",
+    "./chat-preset": "./chat-preset.js",
+    "./chat-preset/locale/*.json": "./chat-preset-locale/*.json",
+    "./chat-preset/icon": "./icon.svg"
   },
   "files": [
     "LICENSE",
     "index.js",
+    "chat-policy.js",
     "client.js",
     "cordis.patch.yml",
     "locale/*.json",
     "README.md",
-    "icon.svg"
+    "icon.svg",
+    "chat-preset.js",
+    "chat-preset-locale/*.json"
   ],
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.1.0",

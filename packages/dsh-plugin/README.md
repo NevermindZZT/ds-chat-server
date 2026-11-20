@@ -51,6 +51,28 @@ Plugin versions through 0.2.2 could write credential record keys with the invali
 
 The panel reports the active session to the host from the embedded page, so import follows whichever conversation is open in the iframe.
 
+## DSH Chat agent preset / DSH Chat 预设
+
+The bundle also supplies a separate **Chat** agent preset (`chat`). Select it when creating a DSH conversation; it does not replace Standard, change the default preset, or change the Chat Server website's own conversations. Existing sessions keep their original preset revision. This preset uses a concise complete persona, retains workspace and global instruction files, and includes compaction, `read`, `read_image`, `write`, `edit`, `glob`, `grep`, `web_search`, `web_fetch`, `ask_user_question`, and `present` when their dependencies are available. Search needs a configured and ready DSH web backend; image reads need an image-capable model and attachment storage. Required runtime context and tool schemas may still be sent to the model.
+
+在 DSH 中新建会话时可选择独立的 **Chat** Agent 预设。它不会替换 Standard、修改默认预设或改变网站自身的聊天模式。预设采用精简提示词，保留工作区指令和上下文压缩，默认提供网页检索、文件读写与搜索、提问和文件交付工具；具体工具是否可用取决于 DSH 的服务配置和模型能力。已有会话保留原预设版本。
+
+### Tool configuration / 工具配置
+
+In the current DSH version, **Settings → Agent presets → View configuration** is read-only. To change this preset, use Creator mode or install a separate override bundle that replaces the complete `preset-chat` configuration, preserving the full plugin list and changing its `chat-tool-policy` entry. Do not edit the installed package directly. `allowedGlobalTools` is an array of **exact tool names** additionally allowed (including individual MCP tools); it defaults to `[]`, so new third-party/global tools are not automatically allowed. `disabledTools` is an array of exact names to deny, and takes priority over the built-in and additional allow lists. For example:
+
+```yaml
+allowedGlobalTools:
+  - mcp__example__search
+disabledTools:
+  - write
+  - edit
+```
+
+These names are examples, not guaranteed to exist. Discover the exact registered name for each MCP tool. The policy matches names rather than trusted provider identities: a global tool with the same name as a built-in tool can be exposed if its preset-local counterpart is disabled. New global registrations are masked when DSH emits a tool change; an execution guard rejects non-allowed names through DSH's shared tool pipeline. Agent-local registrations and transient change notifications can still expose schemas. In particular, `disabledTools` blocks execution of preset-local tools but **may not remove their schemas**; to remove a built-in tool from the model's tool list, also disable that tool on its own preset plugin row (for example set `tool-fs`'s `write: false`). These controls are not a sandbox or a substitute for DSH permission and filesystem policies; file writes are real mutations. Changes to a preset take effect for new agents, so test with a new conversation.
+
+当前 DSH 的「设置 → Agent 预设 → 查看配置」为只读。需要调整时，请使用创造模式或安装单独的覆盖 bundle；覆盖 `preset-chat` 时需保留完整预设配置及插件列表，再修改其中的 `chat-tool-policy`。不要直接修改已安装插件。`allowedGlobalTools` 按工具的完整名称额外放行（包括 MCP 工具），默认为空；`disabledTools` 指定要拒绝的名称，优先于允许列表。名称区分具体注册名，并非按来源验证身份。全局工具变化后会更新隐藏列表，执行时还有作用域 guard；但工具描述可能在变化瞬间或 Agent 自身注册时仍可见。对预设自带工具，`disabledTools` 只保证通过共享执行管线时拒绝调用，不保证隐藏工具描述：若要同时减少工具 schema，请在对应工具插件的配置中关闭它。此功能不是安全沙箱，文件操作仍受 DSH 当前权限和文件系统策略约束。修改预设后请新建会话验证。
+
 ## Settings
 
 The bundle settings page in **插件 → Chat** follows DSH's settings rows and provides:
