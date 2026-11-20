@@ -1,6 +1,6 @@
 # DeepSeek Chat
 
-[![Version](https://img.shields.io/badge/version-0.2.3-blue)](https://github.com/NevermindZZT/ds-chat-server/releases)
+[![Version](https://img.shields.io/badge/version-0.2.4-blue)](https://github.com/NevermindZZT/ds-chat-server/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/nevermindzzt/ds-chat-server)](https://hub.docker.com/r/nevermindzzt/ds-chat-server)
 [![npm](https://img.shields.io/npm/v/@nevermindzzt/dsh-chat-server)](https://www.npmjs.com/package/@nevermindzzt/dsh-chat-server)
@@ -38,7 +38,7 @@ docker compose -f compose.hub.yaml pull
 docker compose -f compose.hub.yaml up -d
 ```
 
-`CHAT_SERVER_IMAGE_TAG` 用于选择镜像标签（默认 `0.2.3`，可设为 `latest` 使用最新发布版本）。在 **设置 → 数据管理** 配置 DeepSeek API Key，也可以在 `.env` 设置 `DEEPSEEK_API_KEY`。用户输入的 API Key 会加密后保存在服务端。SQLite 数据库、上传原件、Skills 和自动生成的加密密钥都保存在持久化 `chat_data` 卷（容器内 `/data`）。
+`CHAT_SERVER_IMAGE_TAG` 用于选择镜像标签（默认 `0.2.4`，可设为 `latest` 使用最新发布版本）。在 **设置 → 数据管理** 配置 DeepSeek API Key，也可以在 `.env` 设置 `DEEPSEEK_API_KEY`。用户输入的 API Key 会加密后保存在服务端。SQLite 数据库、上传原件、Skills 和自动生成的加密密钥都保存在持久化 `chat_data` 卷（容器内 `/data`）。
 
 Compose 默认只绑定本机回环地址。若要公网访问，应通过反向代理提供 HTTPS，并按部署方式设置 `COOKIE_SECURE=true`、`TRUST_PROXY=true`。公开提供服务时还需评估适用的内容安全和服务提供者义务。备份时请先停止容器，确保 SQLite WAL 检查点完成，再备份**整个 `chat_data` 卷**，其中既有 `chat.sqlite` 也有附件文件。
 
@@ -83,7 +83,7 @@ dsh plugin --profile web add @nevermindzzt/dsh-chat-server
 
 ```sh
 dsh plugin --profile web add @nevermindzzt/dsh-chat-server --registry=https://registry.npmjs.org
-dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.3.tgz
+dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.4.tgz
 ```
 
 如果之前安装过旧的 `@local/dsh-chat-server`，请先禁用并移除，否则会出现两个 **Chat** 条目：
@@ -112,8 +112,8 @@ dsh plugin --profile web remove @local/dsh-chat-server
 首次发布前需配置仓库 Secrets：`DOCKERHUB_USERNAME`（`NevermindZZT`）、`DOCKERHUB_TOKEN`（Docker Hub Access Token）、`NPM_TOKEN`（可发布 `@nevermindzzt` scope 的 npm Automation Token），并确保 Docker Hub 仓库和 npm scope 已创建。
 
 ```sh
-git tag v0.2.3
-git push origin v0.2.3
+git tag v0.2.4
+git push origin v0.2.4
 ```
 
 ## 许可证

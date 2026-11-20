@@ -1,6 +1,6 @@
 {
   "name": "@nevermindzzt/dsh-chat-server",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": false,
   "type": "module",
   "description": "Open DeepSeek Chat inside DSH and import conversations into DSH Sessions.",

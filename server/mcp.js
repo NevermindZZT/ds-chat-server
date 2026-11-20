@@ -30,7 +30,7 @@ const SAFE_STDIO_ENV = [
   'LC_ALL',
   'LC_CTYPE',
 ]
-const MCP_CLIENT_INFO = { name: 'deepseek-chat-server', version: '0.2.3' }
+const MCP_CLIENT_INFO = { name: 'deepseek-chat-server', version: '0.2.4' }
 
 class McpRuntimeError extends Error {
   constructor(message, code) {

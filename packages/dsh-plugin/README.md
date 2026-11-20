@@ -18,7 +18,7 @@ If your pnpm uses a China mirror such as `registry.npmmirror.com` and reports `N
 dsh plugin --profile web add @nevermindzzt/dsh-chat-server --registry=https://registry.npmjs.org
 
 # or install the tarball directly
-dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.3.tgz
+dsh plugin --profile web add https://registry.npmjs.org/@nevermindzzt/dsh-chat-server/-/dsh-chat-server-0.2.4.tgz
 ```
 
 Or install `packages/dsh-plugin` as a local bundle in DSH **Plugins → Add plugin**, then enable **Chat**.
